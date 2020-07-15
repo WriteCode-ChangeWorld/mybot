@@ -1,25 +1,26 @@
 import json
 
-from image import tra_images,tra_images_group,cat2pixiv
-
-
+from image import tra_images, tra_images_group, cat2pixiv
+from Arsenal.search_img import image
 
 # 配置文件
-config = json.load(open("config.json",encoding='utf-8-sig'))
+config = json.load(open("config.json", encoding='utf-8-sig'))
 api_key = config['api_key']					# saucenao api_key
-tarce_message = config['tarce_message']  	# 搜番
+# tarce_message = config['tarce_message']  	# 搜番
 search_message = config['search_message']   # 搜图
-setu_message = config['setu_message']  		# 来点x图命令
-setu_path = config['setu_path']  			# x图地址,后续取消
-count_setu = config['count_setu']  			# 统计x图
-search_pid_info = config['search_pid_info'] # 查询pid
+# setu_message = config['setu_message']  		# 来点x图命令
+# setu_path = config['setu_path']  			# x图地址,后续取消
+# count_setu = config['count_setu']  			# 统计x图
+# search_pid_info = config['search_pid_info'] # 查询pid
 coolq_http_api_ip = config['coolq_http_api_ip']
 coolq_http_api_port = config['coolq_http_api_port']
 
+
 # 酷Q http插件私聊推送url
-siliao = "http://{}:{}/send_private_msg?".format(coolq_http_api_ip,coolq_http_api_port)
+siliao = "http://{}:{}/send_private_msg?".format(coolq_http_api_ip, coolq_http_api_port)
 # 酷Q http插件群聊推送url
-qunliao = "http://{}:{}/send_group_msg?".format(coolq_http_api_ip,coolq_http_api_port)
+qunliao = "http://{}:{}/send_group_msg?".format(coolq_http_api_ip, coolq_http_api_port)
+
 
 # 实验性/正在开发的功能
 search_image_enable = "开启搜图"
@@ -32,7 +33,9 @@ reply_image_quit = "搜图模式关闭成功!"
 reply_bot_quit = "检测到发送非图片信息\n搜图模式自动关闭"
 reply_enable_search = "未启用搜图模式!请勿重复关闭!\n(加入黑名单)"
 
-class Executor:
+
+class Executor(object):
+
 	def __init__(self):
 		self.reply_group = {}
 		self.reply = {}
@@ -43,37 +46,66 @@ class Executor:
 					testmode=1&numres=16&api_key={}&&url={}"
 
 
+	def task_parse(self, eval_cqp_data, extra):
+		"""
+		用于校验是否符合功能模块的触发条件
+		:paramas eval_cqp_data: cq数据包
+		:return : 功能模块封装好发给机器人的消息包
+			{"group_id":123456789,"message":"Something","User":[...]}
+			User字段为调用者的自定义数据包,尚未处理
+		"""
 
-	def task_parse(self,eval_cqp_data):
+		# 基本参数
+		user_id = eval_cqp_data["user_id"]
+		msg = eval_cqp_data["message"]
+
+		# ========================功能模块=========================
+		# 开启搜图,结束搜图,搜图名单中
+		if msg == search_image_enable or \
+			msg == search_image_quit  or \
+			user_id in search_image_group_list:
+			message =  img(api_key).parse(eval_cqp_data)
+
+		# 结束搜图
+		# if msg == search_image_quit:
+		# 	return self.search_image(eval_cqp_data)
+
+		# 搜图名单中
+		# if user_id in search_image_group_list:
+			# return self.search_image(eval_cqp_data)
+		# ========================功能模块结束=====================
+
+
+
 		# 模板消息
 		if eval_cqp_data["message_type"] == "group":
-			self.reply_group = {"group_id": eval_cqp_data['group_id']}
+			self.reply_group = {
+				"group_id": eval_cqp_data['group_id'],
+				"message":message
+			}
+			return self.reply_group
 		elif eval_cqp_data["message_type"] == "private":
-			self.reply = {"user_id": eval_cqp_data['user_id']}
+			self.reply = {
+				"user_id": eval_cqp_data['user_id'],
+				"message":message
+			}
+			return self.reply
 
-		msg = eval_cqp_data["message"]
-		user_id = eval_cqp_data["user_id"]
-
-		# 开启搜图
-		if msg == search_image_enable:
-			return self.search_image(eval_cqp_data)
-		# 结束搜图
-		if msg == search_image_quit:
-			return self.search_image(eval_cqp_data)
-
-		# 在搜图名单中
-		if user_id in search_image_group_list:
-			return self.search_image(eval_cqp_data)
-
-	def search_image(self,eval_cqp_data):
+	# TODO(Coder-Sakura): 分离成单一模块, /Arsenal/image.py
+	def search_image(self, eval_cqp_data):
+		"""
+		用于校验是否符合功能模块的触发条件
+		:paramas eval_cqp_data: cq数据包
+		:return : 封装好的消息包
+		"""
 		user_id= eval_cqp_data["user_id"]
-		message_type = eval_cqp_data["message_type"]
 		msg = eval_cqp_data["message"]
+		message_type = eval_cqp_data["message_type"]
 
 		# 开启搜图
 		# 群聊
 		if message_type == "group":
-			print(msg,search_image_group_list)
+			print(msg, search_image_group_list)
 			# 消息 == 开启搜图模式命令
 			if msg == search_image_enable:
 				# 判断是否在搜图名单中,以及恶意开启
@@ -90,9 +122,9 @@ class Executor:
 			elif msg.split(',')[0] == '[CQ:image':
 				for i in search_image_group_list:
 					if user_id == i:
-						msg_url = msg.split("url=")[-1].replace("]","")
-						url = self.search_image_url.format(api_key,msg_url)
-						return tra_images_group(url,eval_cqp_data)
+						msg_url = msg.split("url=")[-1].replace("]", "")
+						url = self.search_image_url.format(api_key, msg_url)
+						return tra_images_group(url, eval_cqp_data)
 			# 消息 == 关闭搜图
 			elif msg == search_image_quit:
 				# 判断是否在搜图名单中,以及恶意关闭
@@ -129,21 +161,21 @@ class Executor:
 				return self.reply
 
 
-
-
-
-
 	def search_anime(self):
 		pass
+
 
 	def jiki(self):
 		pass
 
+
 	def random_pixiv_image(self):
 		pass
 
+
 	def search_pid(self):
 		pass
+
 
 	def count_image(self):
 		pass
