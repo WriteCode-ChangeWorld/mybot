@@ -172,3 +172,4 @@ def tra_images_group(images_url,eval_cqp_data):
                    str(get_cat)
     }
     return search_results
+    
