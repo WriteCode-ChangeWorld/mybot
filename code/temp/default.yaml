@@ -1,0 +1,21 @@
+# Bot Config
+Bot :
+  coolq_http_api_ip : "127.0.0.1"
+  coolq_http_api_port : "5700"
+  mysql :
+    db_host : "127.0.0.1"
+    db_port : 3306
+    db_user : "user"
+    db_passwd : "passwd"
+    db_database : "mybot"
+    db_charset : "utf8mb4"
+
+
+# Plugin Config
+Plugin :
+  saucenao :
+    api_key : "your_apikey"
+
+
+# Debug Config
+Debug : False
