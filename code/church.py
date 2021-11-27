@@ -9,18 +9,22 @@
 '''
 
 # here put the import lib
-from flask import Flask, request, jsonify
-import requests
+import os
 import json
-import random,os
 import time
+import random
+import requests
 from threading import Thread
+from flask import Flask, request, jsonify
+
 
 from executor import Executor
 from users_info import UInfo
 from msg_printers import CHURCH_IDENTIFY_MSG
 # 全局配置文件
 from config import bot_config
+from Arsenal.basic.thread_pool import ThreadPool,callback
+
 
 # 建议定义到开头,不用去找msg_printer
 CHURCH_IDENTIFY_MSG = [

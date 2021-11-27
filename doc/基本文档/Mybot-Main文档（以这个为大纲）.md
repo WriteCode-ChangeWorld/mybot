@@ -62,11 +62,16 @@ Mysql
 
 ---
 
-+ 网络请求——BNConnect √
++ 网络模块——BNConnect √
+  + 网络请求——baseRequests
+  + 文件下载——download_file（流处理）参考之前的脚本或iwara
 + 插件工作目录获取——plus_res_directory
 + 日志记录——log_record √
-+ 数据库操作相关——PyMysql、DBUtils——db_pool √
-+ yaml——json/yaml——>fileHandler √
++ 数据库操作相关——db_pool √
+  + PyMysql+DBUtils
++ 文件处理——fileHandler √
+  + json读写√
+  + yaml读写√
 + 错误处理(用于向管理员报告错误日志、触发语句):flags:
 + 线程池——thread_pool √
 + 定时任务——sched_task(未编写:flags:)

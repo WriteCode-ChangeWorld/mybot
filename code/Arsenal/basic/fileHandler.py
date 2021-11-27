@@ -14,7 +14,7 @@ import yaml
 from yaml.loader import Loader, SafeLoader
 
 
-from log_record import logger
+from Arsenal.basic.log_record import logger
 
 
 class LoadFile:

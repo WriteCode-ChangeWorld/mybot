@@ -8,7 +8,6 @@
 '''
 
 # here put the import lib
-from sys import exec_prefix
 import pymysql
 import datetime
 from DBUtils.PooledDB import PooledDB
@@ -16,9 +15,9 @@ from DBUtils.PooledDB import PooledDB
 from pymysql.cursors import DictCursor
 
 
-from bot_tool import tool
-from log_record import logger
-from msg_temp import DB_TEMP,DB_SQL_TEMP,DB_INSERT_DEFAULT_TEMP
+from Arsenal.basic.bot_tool import tool
+from Arsenal.basic.log_record import logger
+from Arsenal.basic.msg_temp import DB_TEMP,DB_SQL_TEMP,DB_INSERT_DEFAULT_TEMP
 
 
 class db_client:
@@ -126,7 +125,7 @@ class db_client:
         
         :params cqp_data: CQ端数据包
         :params table:    指定数据表
-        :params limit:    自定义返回记录数量, limit=-1 ALL return
+        :params limit:    自定义返回记录数量, 0 -> ALL return
         :params kwargs:   查询条件,只提供=
             查询条件有字符串需要用引号包括
             {"user_id": 123, "group_id": 456}
@@ -144,7 +143,11 @@ class db_client:
             cond = "1 = 1"
 
         func_sql = DB_SQL_TEMP["select_sql"]
-        func_sql += f"LIMIT {limit}"
+        if int(limit) > 0 and isinstance(limit,int):
+            func_sql += f"LIMIT {limit}"
+        elif int(limit) < 0 and isinstance(limit,int):
+            func_sql += f"LIMIT 10"
+
         func_sql = func_sql.format(table,cond)
         logger.debug(func_sql)
 
@@ -167,7 +170,7 @@ class db_client:
         
         # 返回所有查询结果
         if len(res) != 0:
-            if limit == -1:
+            if limit == 0:
                 return res
             else:
                 return res[:limit]
@@ -184,12 +187,13 @@ class db_client:
         :parans cqp_data: CQ端数据包
         :parans table: 指定数据表
         :params kwargs: 额外参数
-            insert_data 指定插入数据
+            insert_data->指定插入数据;insert_data需保持有序,\
+                sql中的字段根据insert_data的key进行拼接
         :return: True Or False
         DBClient.insert_records(cqp_data={"user_id": 1508015265,"group_id": 835006})
         """
         # 无指定插入数据,使用默认模板插入
-        if not kwargs.get("insert_data",""):
+        if not cqp_data and not kwargs.get("insert_data",""):
             uid = cqp_data["user_id"]
             gid = cqp_data["group_id"]
             user_data = {"uid": uid,"gid": gid}
@@ -217,12 +221,20 @@ class db_client:
             return False
 
         conn,cur = self.get_conn()
-        perch = ",".join(["%s" for i in range(len(DB_SQL_TEMP["insert_sql_keys_str"].split(",")))])
-        insert_sql = DB_SQL_TEMP["insert_sql"].format(table,DB_SQL_TEMP["insert_sql_keys_str"],perch)
+        
+        if not cqp_data and kwargs.get("insert_data",""):
+            sql_keys_str = ",".join(kwargs["insert_data"].keys())
+        else:
+            sql_keys_str = DB_SQL_TEMP["insert_sql_keys_str"]
+
+        # perch = ",".join(["%s" for i in range(len(DB_SQL_TEMP["insert_sql_keys_str"].split(",")))])
+        perch = ",".join(["%s" for i in range(len(sql_keys_str.split(",")))])
+        insert_sql = DB_SQL_TEMP["insert_sql"].format(table,sql_keys_str,perch)
+        
         logger.debug(f"insert_sql - {insert_sql}")
         logger.debug(f"<user_data> - {user_data}")
         try:
-            cur.execute(insert_sql,user_data)
+            # cur.execute(insert_sql,user_data)
             conn.commit()
         except Exception as e:
             conn.rollback()

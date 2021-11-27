@@ -1,62 +1,116 @@
-import json
-import os
 import sys
-sys.path.append("Arsenal")
-# from image import tra_images, tra_images_group, cat2pixiv
+import time
+# sys.path.append("Arsenal")
 
-# 搜图模块
-# from Arsenal.bot_saucenao_img import SauceNao
-from config import bot_config
-from dynamic_load_module import import_modules
+from dynamic_import import Dynamic_Load
+from Arsenal.basic.bot_tool import tool
+from Arsenal.basic.db_pool import DBClient
+from Arsenal.basic.log_record import logger
+from Arsenal.basic.msg_temp import MYBOT_ERR_CODE
+from Arsenal.basic.thread_pool import ThreadPool,callback
+from Arsenal.basic.task_processor import taskprocessor
 
-
-# ========后期需要清理==============
-# =======================================================
-# 配置文件
-# config = json.load(open("config.json", encoding='utf-8-sig'))
-# api_key = config['api_key']					# saucenao api_key
-# tarce_message = config['tarce_message']  	# 搜番
-# search_message = config['search_message']   # 搜图
-# setu_message = config['setu_message']  		# 来点x图命令
-# setu_path = config['setu_path']  			# x图地址,后续取消
-# count_setu = config['count_setu']  			# 统计x图
-# search_pid_info = config['search_pid_info'] # 查询pid
-# coolq_http_api_ip = config['coolq_http_api_ip']
-# coolq_http_api_port = config['coolq_http_api_port'] 
-
-
-# 酷Q http插件私聊推送url
-# siliao = "http://{}:{}/send_private_msg?".format(coolq_http_api_ip, coolq_http_api_port)
-# 酷Q http插件群聊推送url
-# qunliao = "http://{}:{}/send_group_msg?".format(coolq_http_api_ip, coolq_http_api_port)
-# =======================================================
-
-
-# 实验性/正在开发的功能
-# search_image_enable = "开启搜图"
-# search_image_quit = "关闭搜图"
-# search_image_group_list = []
-# search_image_list = []
-# reply_image = "搜图模式开启成功!\n发送图片或连续发图进行搜图吧~"
-# reply_tip = "已开启搜图模式,请勿重复开启!\n(加入黑名单)"	# 观察者对此项进行监控,重复开启则进入限制模式
-# reply_image_quit = "搜图模式关闭成功!"
-# reply_bot_quit = "检测到发送非图片信息\n搜图模式自动关闭"
-# reply_enable_search = "未启用搜图模式!请勿重复关闭!\n(加入黑名单)"
-# ========后期需要清理==============
-
-
-class Executor(object):
-
+class Executor:
+	"""执行者: 插件动态导入执行及多线程任务分配"""
 	def __init__(self):
+		# 为tool创建线程池pool
+		self.init_thread_pool(8)
+		# self.pool = tool.pool
+
+		# tool.pool = ThreadPool(max_num=8)
+		tool.pool.put(self.cycle_task_detect, ()) # 实例化后启动定时检测线程
+
+		# self.terminal = tool.pool.terminal
+
+		# 动态导入调试中
+		# self.dynamic_load = Dynamic_Load()
+
 		# 回复群聊的数据包
 		self.reply_group = {}
 		# 回复私聊的数据包
 		self.reply = {}
+		
 		# trace.moe的api地址
 		# self.trace_moe_url = 'https://trace.moe/api/search?url='
 		# saucenao的API地址
 		# self.search_image_url = "https://saucenao.com/search.php?db=999&output_type=2&\
 		# 			testmode=1&numres=16&api_key={}&&url={}"
+
+	# thread_pool func start
+	def init_thread_pool(self,max_num=8):
+		"""
+		初始化线程池,暂不考虑reload情况
+		(not reliable!)不可靠不建议使用
+		"""
+		try:
+			if hasattr(tool,"pool"):
+				print("in hasattr tool pool")
+				tool.pool.terminal = True
+				print("等待3秒重启线程池")
+				time.sleep(3)
+				# tool.pool.close()
+				# for current_thread in tool.pool.generate_list:
+				# 	tool.pool.generate_list.remove(current_thread)
+		except Exception as e:
+			logger.debug(MYBOT_ERR_CODE.format(e))
+			return False
+		finally:
+			# 再次初始化时重置中断标志
+			tool.pool = ThreadPool(max_num=max_num)
+			tool.pool.terminal = False
+			print("over")
+			return True
+
+	@logger.catch
+	def cycle_task_detect(self,cycle=10):
+		"""
+		定时(<cycle>秒)监测任务并将任务放入线程池执行
+		:params cycle: 监测周期,默认10秒检查一次
+		"""
+		# 通过terminal来强制中断
+		while True:
+			if tool.pool.terminal:
+				break
+
+			tasks_list = taskprocessor.get_tasks()
+			if not tasks_list:
+				logger.info("TABLE:tasks has no tasks")
+			else:
+				taskprocessor.exec_tasks(tasks_list)
+
+			print(f"cycle {tool.pool.terminal}")
+			time.sleep(cycle)
+
+	# def create_tasks(self,insert_data):
+	# 	"""
+	# 	根据insert_data创建task记录
+	# 	:params insert_data: 任务信息, key顺序必须与数据库字段一样
+	# 	:return: True or False
+	# 	"""
+	# 	result = DBClient.insert_records(cqp_data=None, table="tasks", **{"insert_data": insert_data})
+	# 	# result = DBClient.insert_records(cqp_data=None, table="tasks", **{insert_data})
+	# 	return result
+
+	# def get_tasks(self,nums=0):
+	# 	"""
+	# 	从tass表中根据优先级获取nums个waiting状态的任务
+	# 	:params nums: 获取的任务数量
+	# 		range:1~10 0 -> all
+	# 	:return: tasks_dict
+	# 	"""
+	# 	if nums == 0:
+	# 		limit = -1
+	# 	elif 1 <= nums <= 10:
+	# 		limit = nums
+	# 	else:
+	# 		limit = 10
+	# 	result = DBClient.select_records(table="tasks",limit=limit,**{"task_status":"waiting"})
+	# 	return sorted(result, key=lambda x: x["task_level"], reverse=True)
+
+	# def exec_tasks(self,tasks_list):
+	# 	pass
+
+	# thread_pool func end
 
 	def load_function_list(self):
 		"""
@@ -70,8 +124,8 @@ class Executor(object):
 			
 			zz = __import__("{}.{}".format("Arsenal",i.split(".")[0]),fromlist = ("SauceNao",))
 		"""
-		module_paths = import_modules('Arsenal/bot**.py')
-
+		# module_paths = import_modules('Arsenal/bot**.py')
+		module_paths = self.dynamic_load.import_modules(self.dynamic_load.pathname)
 
 	def task_parse(self, eval_cqp_data, extra=None):
 		"""
@@ -195,3 +249,4 @@ class Executor(object):
 				search_image_list.append(user_id)
 				self.reply["message"] = reply_image
 				return self.reply
+

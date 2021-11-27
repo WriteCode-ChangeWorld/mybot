@@ -50,6 +50,8 @@ CREATE TABLE tasks(
   id int AUTO_INCREMENT PRIMARY KEY,
   creator_id INT(20) NOT NULL,
   group_id INT(20) NOT NULL,
+  task_type VARCHAR(30) NOT NULL,
+  by_plugin VARCHAR(30) NOT NULL,
   create_time DATETIME NOT NULL,
   task_status VARCHAR(20) NOT NULL,
   task_level INT(5) NOT NULL,

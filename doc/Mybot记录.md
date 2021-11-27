@@ -197,16 +197,6 @@ def change_timedelta(datetime_obj,offset_dict={}):
 
 
 
-
-
----
-
-### 随机插画模式
-
-反代直链，1次3个
-
-
-
 **结果匹配**
 
 `saucenao`
@@ -228,6 +218,19 @@ def change_timedelta(datetime_obj,offset_dict={}):
 ```python
 
 ```
+
+---
+
+### 随机插画模式
+
++ 反代直链
++ 二维码（↓）
++ 字符画
++ 幻影坦克
++ master1200展示（增加服务端api模块:random-info接口返回字段:urls）
++ 
+
+
 
 
 
@@ -252,9 +255,23 @@ def change_timedelta(datetime_obj,offset_dict={}):
 
 ### 插件热重载
 
+dynamic_import，重新导入
+
+---
+
+### 主动调用(线程池任务)——**bot_tool**
+
+> 归属：module: executor
+
+具体文档参照：[Executor线程池相关文档](.\基本文档\Executor线程池相关文档.md)
 
 
-### 主动调用
+
+
+
+
+
+
 
 
 

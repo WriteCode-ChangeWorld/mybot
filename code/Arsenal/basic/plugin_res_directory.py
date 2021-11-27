@@ -9,11 +9,12 @@
 '''
 
 # here put the import lib
-# 导入内置库及第三方库
 import os
 
-# 导入自定义模块
+
 # from your_module import your func
+# from log_record import logger
+from Arsenal.basic.log_record import logger
 
 
 class PRDirectory:
@@ -41,9 +42,11 @@ class PRDirectory:
         try:
             os.mkdir(path)
         except Exception as e:
-            # 日志记录并打印e
+            logger.warning(f"<Exception> - {e}")
+            logger.warning(f"<Error Path> - {path}")
             return False
-        return True
+        else:
+            return True
 
     def get_plus_res(self,plus_name):
         """返回插件对应的res文件目录

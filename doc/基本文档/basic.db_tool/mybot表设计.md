@@ -188,13 +188,15 @@ https://blog.csdn.net/qq_45701131/article/details/115803260
 | id              | 自增id                               | int           |                                                              |
 | creator_id      | 创建任务的用户qq号码                 | INT(20)       | 0代表程序内部创建<br />qq号码代表用户                        |
 | group_id        | 创建任务的用户所在群组id             | INT(20)       | 0代表程序内部创建<br /><br />1代表私聊创建<br />群组id代表用户所在群组 |
+| task_type       | 任务类型                             | VARCHAR(30)   | 循环型：cycle<br />单次执行： once                           |
+| by_plugin       | 描述的插件信息                       | VARCHAR(30)   | 非必要填写，一般用作跟踪task的信息                           |
 | create_time     | 任务创建时间                         | DATETIME      |                                                              |
 | task_status     | 任务状态                             | VARCHAR(20)   | completed代表已完成<br />ongoing代表进行中<br />waiting代表等待中<br />error代表执行出错 |
-| task_level      | 任务优先级,越高越先执行              | INT(5)        |                                                              |
+| task_level      | 任务优先级,越高越先执行              | INT(5)        | 默认5，1~10                                                  |
 | exec_task       | 任务执行语句；可直接使用eval转化运行 | VARCHAR(1024) |                                                              |
 | exec_time       | 执行时间<br />YY:MM:DD hh:mm:ss      | DATETIME      |                                                              |
 | report_user_id  | 结果报告人id                         | INT(20)       | 0代表报告人为creator_id<br />-1代表无需报告结果<br />其他代表report_user_id |
-| report_group_id | 结果报告人所在群组id                 | INT(20)       | 0代表group_id<br />-1代表无需报告结果<br />其他代表report_group_id |
+| report_group_id | 结果报告人所在群组id                 | INT(20)       | 0代表group_id<br />-1代表无需报告结果或私聊创建<br />其他代表report_group_id |
 
 
 

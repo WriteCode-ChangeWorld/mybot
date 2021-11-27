@@ -14,7 +14,7 @@ import glob
 import importlib
 sys.path.append("Arsenal")
 
-from Arsenal.basic.bot_tool import bot
+from Arsenal.basic.bot_tool import tool
 
 class Dynamic_Load:
     def __init__(self):

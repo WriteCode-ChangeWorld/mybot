@@ -27,7 +27,9 @@ TOOL_TEMP = {
     "load_config_error": "MybotConfigLoadError - 配置加载异常",
     "debug_status": "DEBUG STATUS: {}",
     "config_path_info": "MybotConfigFilePath - {}",
-    "config_info": "MybotConfig - {}"
+    "config_info": "MybotConfig - {}",
+    "cq_http_send_group_url": "http://{}:{}/send_group_msg",
+    "cq_http_send_private_url": "http://{}:{}/send_private_msg"
 }
 
 # basic:db_pool
@@ -95,8 +97,9 @@ WHATANIME_MSG = {
 
 # ===== main start =====
 # main:error_code 错误码
-QQBOT_ERR_CODE = {
+MYBOT_ERR_CODE = {
     "Arsenal_Not_Found": "Arsenal目录不存在,请重新检查并创建",
+    "Generic_Exception_Info": "Exception : {}"
 }
 
 # main:church.identify_data模板
@@ -106,12 +109,12 @@ CHURCH_IDENTIFY_MSG = [
     {"code": 0, "description": "距离下次调用还有{}秒,当前非法调用:{}次"},
     {"code": 1, "description": "识别到用户再次过快调用,请等待20秒再调用"},
     {"code": 10, "description": "识别到用户状态正常"},
-    {"code": 200, "description": "识别通过,用户状态正常"},
+    {"code": 200, "description": "识别通过,用户状态正常"}
 ]
 
 # main:priority 优先级
 EXECUTOR_FUNCTION_LIST = [
     {"priority": 500, "function": "SauceNao", "module": ""},
-    {"priority": 500, "function": "Ascii2d", "module": ""},
+    {"priority": 500, "function": "Ascii2d", "module": ""}
 ]
 # ===== main end =====
