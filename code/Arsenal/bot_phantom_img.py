@@ -2,7 +2,7 @@ import os
 import time
 from PIL import Image,ImageDraw,ImageFont
 
-from basic.plus_res_directory import pdr
+from Arsenal.basic.plugin_res_directory import pdr
 
 # 白色背景——ImageA——opacity=100%
 # 黑色背景——ImageB——opacity=0%
@@ -145,6 +145,6 @@ if __name__ == "__main__":
     # from bot_phantom_img import Bot_Phantom_Img
     # img1_path = r'D:\Code\mybot\code\res\Phantom_Img\85071750_p0.jpg'
     # img1_path = r'D:\Code\mybot\code\res\Phantom_Img\82028936_p0.jpg'
-    img1_path = r'C:\Users\lenovo\Desktop\收藏\83887426_p0.png'
+    img1_path = r'C:\Users\lenovo\Desktop\校验集-收藏\83887426_p0.png'
     Bot_Phantom_Img = Phantom_Img() 
     Bot_Phantom_Img.main(img1_path)

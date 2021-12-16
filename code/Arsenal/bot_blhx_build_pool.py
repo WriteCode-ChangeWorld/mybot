@@ -1,3 +1,13 @@
+# -*- encoding: utf-8 -*-
+'''
+@File    :   bot_blhx_build_pool.py
+@Time    :   2021/03/30 17:30:10
+@Author  :   Coder-Sakura
+@Version :   1.0
+@Desc    :   碧蓝航线十连建造
+'''
+
+# here put the import lib
 import os
 import copy
 import json
@@ -6,8 +16,8 @@ import random
 from PIL import Image,ImageDraw
 from collections import Counter
 
-from basic.plugin_res_directory import pdr
-from bot_day_illust import Day_Illust
+from Arsenal.basic.plugin_res_directory import pdr
+from Arsenal.bot_day_illust import Day_Illust
 
 class Lucky_Ships_Pool:
     """构建卡池及建造函数"""
@@ -374,6 +384,9 @@ class Blhx_Build_Pool:
     # Bot_Blhx_Build_Pool.main(1508015265,extra={"pool":"活动池","multiple":10,"skin":False})
     """对接业务上层-碧蓝航线模拟十连建造"""
     def __init__(self):
+        # plugin_level
+        # self.plugin_level = 10
+
         # 服务器端自定义
         self.bot_name = type(self).__name__
         # D:\Code\mybot\code\res\Blhx_Build_Pool
@@ -619,7 +632,7 @@ class Blhx_Build_Pool:
                                     "\n当前收藏率:{}".format(bookmark_rate)
                 return data
 
+    def parse(self,msg):
+        return msg + self.bot_name
 
-
-# BBP = Blhx_Build_Pool()
 Bot_Blhx_Build_Pool = Blhx_Build_Pool()

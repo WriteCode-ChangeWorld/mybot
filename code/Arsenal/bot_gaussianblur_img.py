@@ -38,8 +38,9 @@ class GasussianBlur_Img:
         # self.path = r"C:\Users\Administrator\Desktop\CQA-tuling\python插件\coolq-trace_anime-master\res\blur"
         self.path = ""
         if not self.path:self.path = os.getcwd()
+        self.default_radius = 10
 
-    def ready_img(self,img_path=None,img_url=None,radius=10)->str:
+    def ready_img(self,img_path=None,img_url=None,radius=None)->str:
         """
         在filter进行前的一些准备工作,比如下载/打开图片以获得Image对象
 
@@ -49,11 +50,14 @@ class GasussianBlur_Img:
         :param img_url: 网络图片路径
         https://i.pximg.net/img-master/img/2019/11/12/03/26/16/77775892_master1200.jpg
 
-        :return: 添加高斯模糊后的本地图片路径
+        :return: new_img_path 添加高斯模糊后的本地图片路径
         """
         # 两个参数都不存在
         if not img_path and not img_url:
             return ""
+
+        if not radius:
+            radius = self.default_radius
 
         # 本地图片路径优先
         if img_path:

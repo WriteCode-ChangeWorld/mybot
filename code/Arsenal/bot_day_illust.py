@@ -4,14 +4,14 @@ import time
 import random
 import configparser
 
-from basic.BNConnect import log_str
+from Arsenal.basic.BNConnect import logger
 # from basic.log_record import logger
 # 2.0
-from basic.plugin_res_directory import pdr
-from bot_gaussianblur_img import Bot_GasussianBlur_Img
+from Arsenal.basic.plugin_res_directory import pdr
+from Arsenal.bot_gaussianblur_img import Bot_GasussianBlur_Img
 # from color_img import get_img
-from bot_color_img import get_img
-from image import cat2pixiv
+from Arsenal.bot_color_img import get_img
+from Arsenal.image import cat2pixiv
 
 class Day_Illust:
 	"""每日涩图"""
@@ -22,11 +22,14 @@ class Day_Illust:
 
 	def __init__(self):
 		self.bot_name = type(self).__name__
+		self.plugin_level = 8
+
 		self.flag = False
 		
 		# 本功能插件res目录 2.0
-		# self.plus_res_path = pdr.get_plus_res(self.bot_name)
-		self.plus_res_path = r"D:\Code\mybot\code\res\Day_Illust"
+		self.plus_res_path = pdr.get_plus_res(self.bot_name)
+		logger.debug("{} - {}".format(self.bot_name,self.plus_res_path))
+		# self.plus_res_path = r"D:\Code\mybot\code\res\Day_Illust"
 
 		self.person_file_path = os.path.join(self.plus_res_path,"NewYearIllust.conf")
 

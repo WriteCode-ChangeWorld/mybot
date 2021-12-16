@@ -143,9 +143,11 @@ class db_client:
             cond = "1 = 1"
 
         func_sql = DB_SQL_TEMP["select_sql"]
+        # 0 -> ALL
         if int(limit) > 0 and isinstance(limit,int):
             func_sql += f"LIMIT {limit}"
         elif int(limit) < 0 and isinstance(limit,int):
+            limit = 10
             func_sql += f"LIMIT 10"
 
         func_sql = func_sql.format(table,cond)
@@ -170,11 +172,13 @@ class db_client:
         
         # 返回所有查询结果
         if len(res) != 0:
+            print("in")
             if limit == 0:
                 return res
             else:
                 return res[:limit]
         else:
+            print("out")
             return []
 
     def insert_records(self,
@@ -234,7 +238,7 @@ class db_client:
         logger.debug(f"insert_sql - {insert_sql}")
         logger.debug(f"<user_data> - {user_data}")
         try:
-            # cur.execute(insert_sql,user_data)
+            cur.execute(insert_sql,user_data)
             conn.commit()
         except Exception as e:
             conn.rollback()

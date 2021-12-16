@@ -6,21 +6,18 @@ from dynamic_import import Dynamic_Load
 from Arsenal.basic.bot_tool import tool
 from Arsenal.basic.db_pool import DBClient
 from Arsenal.basic.log_record import logger
-from Arsenal.basic.msg_temp import MYBOT_ERR_CODE
-from Arsenal.basic.thread_pool import ThreadPool,callback
+from Arsenal.basic.msg_temp import MYBOT_ERR_CODE, EXECUTOR_TASK_STATUS_INFO, TASK_PROCESSOR_TEMP
+from Arsenal.basic.thread_pool import ThreadPool, callback
 from Arsenal.basic.task_processor import taskprocessor
 
 class Executor:
-	"""执行者: 插件动态导入执行及多线程任务分配"""
+	"""执行者: 动态导入插件及执行"""
 	def __init__(self):
 		# 为tool创建线程池pool
 		self.init_thread_pool(8)
-		# self.pool = tool.pool
 
-		# tool.pool = ThreadPool(max_num=8)
-		tool.pool.put(self.cycle_task_detect, ()) # 实例化后启动定时检测线程
-
-		# self.terminal = tool.pool.terminal
+		# 启动定时任务检测线程
+		# tool.pool.put(self.cycle_task_detect, (), callback)
 
 		# 动态导入调试中
 		# self.dynamic_load = Dynamic_Load()
@@ -40,25 +37,20 @@ class Executor:
 	def init_thread_pool(self,max_num=8):
 		"""
 		初始化线程池,暂不考虑reload情况
-		(not reliable!)不可靠不建议使用
+		< -- not reliable! -- >
 		"""
 		try:
 			if hasattr(tool,"pool"):
-				print("in hasattr tool pool")
 				tool.pool.terminal = True
-				print("等待3秒重启线程池")
+				logger.debug("3秒后重启线程池...")
 				time.sleep(3)
-				# tool.pool.close()
-				# for current_thread in tool.pool.generate_list:
-				# 	tool.pool.generate_list.remove(current_thread)
 		except Exception as e:
 			logger.debug(MYBOT_ERR_CODE.format(e))
 			return False
 		finally:
-			# 再次初始化时重置中断标志
+			# 重置中断标志
 			tool.pool = ThreadPool(max_num=max_num)
 			tool.pool.terminal = False
-			print("over")
 			return True
 
 	@logger.catch
@@ -69,17 +61,25 @@ class Executor:
 		"""
 		# 通过terminal来强制中断
 		while True:
+			logger.info(TASK_PROCESSOR_TEMP["TASK_START"])
 			if tool.pool.terminal:
+				logger.info(TASK_PROCESSOR_TEMP["TASK_BREAK_TERMINAL"])
 				break
 
 			tasks_list = taskprocessor.get_tasks()
 			if not tasks_list:
-				logger.info("TABLE:tasks has no tasks")
+				logger.info(TASK_PROCESSOR_TEMP["TASK_NO_RECORD"])
 			else:
-				taskprocessor.exec_tasks(tasks_list)
+				tasks_count_info = taskprocessor.task_count(tasks_list)
+				[logger.info(EXECUTOR_TASK_STATUS_INFO["info"].format(i,j)) for i,j in tasks_count_info.items()]
+				
+				for task in tasks_list:
+					tool.pool.put(taskprocessor.exec_tasks, (task,), callback)
 
-			print(f"cycle {tool.pool.terminal}")
+			logger.info(TASK_PROCESSOR_TEMP["TASK_END"].format(cycle))
 			time.sleep(cycle)
+
+	
 
 	# def create_tasks(self,insert_data):
 	# 	"""

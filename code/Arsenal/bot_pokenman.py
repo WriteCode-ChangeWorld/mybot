@@ -5,7 +5,7 @@ from lxml import etree
 # pip3 install PyExecJS 
 # import execjs,datetime
 
-from basic.plus_res_directory import pdr
+from Arsenal.basic.plugin_res_directory import pdr
 
 def return_value(name1,name2):
 	try:

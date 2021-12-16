@@ -4,7 +4,7 @@ import random
 import requests
 from PIL import Image, ImageDraw, ImageFont
 
-from basic.plus_res_directory import pdr
+from Arsenal.basic.plugin_res_directory import pdr
 
 
 class Blhx_Secretary:

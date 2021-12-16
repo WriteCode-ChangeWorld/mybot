@@ -29,10 +29,11 @@ requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 # from future.Arsenal.url_suolink import SuoLink
 
 # dev环境
-from basic.plus_res_directory import pdr
-from basic.BNConnect import baseRequest
-from basic.BNConnect import log_str
-from basic.url_985so import so985
+from Arsenal.basic.plugin_res_directory import pdr
+from Arsenal.basic.BNConnect import baseRequest
+from Arsenal.basic.BNConnect import log_str
+# 2021年12月12日23:21:55
+# from Arsenal.basic.url_985so import so985
 # 导入上层temp模板
 # from msg_printers import WHATANIME_MSG
 
@@ -418,7 +419,7 @@ class WhatAnime:
         # 视频预览链接
         try:
             preview_url = whatanime_result["video"]
-            preview_url = so985().get_slink(preview_url)
+            # preview_url = so985().get_slink(preview_url)
             preview_url = preview_url.replace("http://","")
             log_str("short url: {}".format(preview_url))
         except Exception as e:

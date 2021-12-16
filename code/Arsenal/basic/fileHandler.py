@@ -18,7 +18,7 @@ from Arsenal.basic.log_record import logger
 
 
 class LoadFile:
-	# read yaml file
+	# read yaml file  
     @logger.catch
     def by_yaml(self, yaml_path, encoding='utf8', loader=SafeLoader):
         try:

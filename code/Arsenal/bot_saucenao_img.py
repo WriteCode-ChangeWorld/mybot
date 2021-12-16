@@ -13,8 +13,8 @@ requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 # 2020年9月19日19:40:47
 # 从msg_printers中导入功能模块对应的模板消息
-from msg_printers import SEARCH_IMG_MSG
-from config import bot_config
+from Arsenal.basic.msg_temp import SEARCH_IMG_MSG
+from Arsenal.basic.bot_tool import tool
 
 class SauceNao:
 	"""搜图功能实现类,返回msg"""

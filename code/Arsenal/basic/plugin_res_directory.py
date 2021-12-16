@@ -29,7 +29,7 @@ class PRDirectory:
         # print(self.bot_name)
 
         # 默认res资源文件根目录
-        self.res_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),"..\\..\\res")
+        self.res_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),"..\\..\\resource")
         if not os.path.exists(self.res_path):
             os.mkdir(self.res_path)
         

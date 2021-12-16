@@ -1,13 +1,28 @@
-# coding=utf8
-pass
+# -*- encoding: utf-8 -*-
+'''
+@File    :   level_manager.py
+@Time    :   2021/11/30 15:18:46
+@Author  :   Coder-Sakura
+@Version :   1.0
+@Desc    :   None
+'''
+
+# here put the import lib
+from Arsenal.basic.bot_tool import tool
+
 
 pass
 
 
 class Monitor(object):
-	"""观察者,用户权限分配及调度"""
+	"""用户/群组的权限查看/更新"""
 	def __init__(self):
-		pass
+		# 默认权限
+		self.general_user_level = int(tool.get_items('["Bot"]["level"]["user"]["general"]'))
+		self.vip_user_level = int(tool.get_items('["Bot"]["level"]["user"]["vip"]'))
+		self.admin_user_level = int(tool.get_items('["Bot"]["level"]["user"]["admin"]'))
+		self.general_gruop_level = int(tool.get_items('["Bot"]["level"]["gruop"]["general"]'))
+		self.vip_gruop_level = int(tool.get_items('["Bot"]["level"]["gruop"]["vip"]'))
 
 	# TODO(Coder-Sakura): 2020/07/12 16:09 限制数据采集
 	def eyes(self, eval_cqp_data):

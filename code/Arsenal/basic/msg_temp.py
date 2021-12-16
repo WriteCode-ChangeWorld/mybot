@@ -64,6 +64,16 @@ DB_INSERT_DEFAULT_TEMP = {
     }
 }
 
+# basic:task_processor 错误信息模板
+TASK_PROCESSOR_TEMP = {
+    "TASK_START": "task start",
+    "TASK_BREAK_TERMINAL": "task break by <pool.terminal>",
+    "TASK_NO_RECORD": "check:TABLE no tasks",
+    "TASK_END": "task end. Sleep {}",
+    "NULL_VALUE": "<{}> is null value",
+    "NOT_DATETIME_DATA": "<{}> is not DATETIME data"
+}
+
 # basic:fileHandler
 # FILEIO_ERROR_INFO = {
 #     "loadYamlErrorInfo": "",
@@ -117,4 +127,9 @@ EXECUTOR_FUNCTION_LIST = [
     {"priority": 500, "function": "SauceNao", "module": ""},
     {"priority": 500, "function": "Ascii2d", "module": ""}
 ]
+
+# main:executor 
+EXECUTOR_TASK_STATUS_INFO = {
+    "info": "task_status:<{}> nums:<{}>"
+}
 # ===== main end =====

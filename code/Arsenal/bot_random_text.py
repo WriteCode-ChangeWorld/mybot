@@ -3,8 +3,8 @@ import time
 import random
 from gtts import gTTS
 
-from basic.plus_res_directory import pdr
-from basic.BNConnect import baseRequest
+from Arsenal.basic.plugin_res_directory import pdr
+from Arsenal.basic.BNConnect import baseRequest
 
 """
 from future.Arsenal.basic.BNConnect import baseRequest

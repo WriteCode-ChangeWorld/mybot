@@ -39,12 +39,13 @@ class Config:
 	def __init__(self):
 		self.config = init_config()
 
+		# 初始化log
 		logger.info(TOOL_TEMP["load_config_success"])
 		logger.warning(TOOL_TEMP["debug_status"].format(self.config['Debug']))
 		logger.debug(TOOL_TEMP["config_info"].format(self.config))
 		logger.debug(TOOL_TEMP["config_path_info"].format(config_path))
 
-		# CQ通信
+		# 通信
 		self.coolq_http_api_ip = self.get_items('["Bot"]["coolq_http_api_ip"]')
 		self.coolq_http_api_port = self.get_items('["Bot"]["coolq_http_api_port"]')
 		self.send_group_url = TOOL_TEMP["cq_http_send_group_url"].format(self.coolq_http_api_ip,self.coolq_http_api_port)
@@ -56,8 +57,11 @@ class Config:
 
 		# 标志位
 		# PLUGIN_BLOCK
+		# 主动式插件消息命中解析规则返回
 		self.PLUGIN_BLOCK = 0
 		# PLUGIN_IGNORE
+		# 主动式插件消息未命中解析规则
+		# 被动式插件跳过自身
 		self.PLUGIN_IGNORE = 1
 
 	# get value from obj by value_path
@@ -124,14 +128,14 @@ class Config:
 		return user_msg
 
 	# === CQ code start ===
-	def CQ_IMG_BY_URL(self,img_url):
+	def CQ_IMG_URL(self,img_url):
 		"""
 		CQ码: 网络图片链接
 		:parmas img_url: 图片链接
 		"""
 		return CONFIG_CQ_CODE["reply_img"].format(img_url)
 
-	def CQ_IMG_BY_LOCAL(self,img_path):
+	def CQ_IMG_LOCAL(self,img_path):
 		"""
 		CQ码: 本地图片
 		:parmas img_path: 本地图片路径
@@ -145,14 +149,14 @@ class Config:
 		"""
 		return CONFIG_CQ_CODE["reply_at"].format(user_id)
 
-	def CQ_AUDIO(self,audio_url):
+	def CQ_AUDIO_URL(self,audio_url):
 		"""
 		CQ码: 网络语音
 		:parmas audio_url: 网络语音url
 		"""
 		return CONFIG_CQ_CODE["reply_audio"].format(audio_url)
 
-	def local_audio(self,audio_path):
+	def CQ_AUDIO_LOAL(self,audio_path):
 		"""
 		CQ码: 本地语音
 		:parmas audio_path: 本地语音路径

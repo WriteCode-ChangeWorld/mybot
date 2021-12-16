@@ -1,7 +1,7 @@
 import requests
 from lxml import etree
 
-from basic.BNConnect import log_str,baseRequest
+from Arsenal.basic.BNConnect import log_str,baseRequest
 
 class Ascii2d_Img:
 	"""Ascii2d搜图站点插件,返回色彩检索及特征检索的结果"""
