@@ -1,25 +1,31 @@
-# coding=utf8
-"""
-__time__:2020/07/15 11:22
-__author__:Coder-Sakura
-BNConnect,格式化输出及一个健壮的,可拓展的基本网络请求函数
-"""
+# -*- encoding: utf-8 -*-
+'''
+@File    :   BNConnect.py
+@Time    :   2020/07/15 11:22
+@Author  :   Coder-Sakura
+@Version :   1.0
+@Desc    :   None
+'''
+
+# here put the import lib
 import time
 import requests
 # 强制取消警告
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
+from Arsenal.basic.log_record import logger
+
 # 0502 暂时
-import os
-from loguru import logger
-root_path = r"D:\Code\mybot\code\log"
-# root_path = os.getcwd()
-logger.add(
-    os.path.join(root_path,"{time}.log"),
-    encoding="utf-8",
-    rotation="12:00"
-    )
+# import os
+# from loguru import logger
+# root_path = r"D:\Code\mybot\code\log"
+# # root_path = os.getcwd()
+# logger.add(
+#     os.path.join(root_path,"{time}.log"),
+#     encoding="utf-8",
+#     rotation="12:00"
+#     )
 # 0502
 
 headers = {
@@ -31,12 +37,12 @@ headers = {
 		'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36',
 }
 
-def log_str(*args,end=None):
-	global logger
-	for i in args:
-		text = '[{}] {}'.format(time.strftime("%Y-%m-%d %H:%M:%S"),i)
-		# print(text,end=end)
-		logger.debug(text)
+# def log_str(*args,end=None):
+# 	global logger
+# 	for i in args:
+# 		text = '[{}] {}'.format(time.strftime("%Y-%m-%d %H:%M:%S"),i)
+# 		# print(text,end=end)
+# 		logger.debug(text)
 
 
 def baseRequest(options,method="GET",data=None,params=None,retry_num=5):
@@ -52,7 +58,7 @@ def baseRequest(options,method="GET",data=None,params=None,retry_num=5):
 
 	如果options中有定义了headers参数,则使用定义的;否则使用默认的headers
 
-	下面这行列表推导式作用在于：
+	下面这行列表推导式作用在于:
 	添加referer时,referer需要是上一个页面的url,比如:画师/作品页面的url时,则可以自定义请求头
 	demo如下:
 	demo_headers = headers.copy()
@@ -64,7 +70,7 @@ def baseRequest(options,method="GET",data=None,params=None,retry_num=5):
 	baseRequest(options = options)
 	这样baseRequest中使用的headers则是定制化的headers,而非默认headers
 	'''
-	# log_str(options["url"])
+	# logger(options["url"])
 	base_headers = [options["headers"] if "headers" in options.keys() else headers][0]
 
 	try:
@@ -84,6 +90,6 @@ def baseRequest(options,method="GET",data=None,params=None,retry_num=5):
 		if retry_num > 0:
 			return baseRequest(options,data,params,retry_num=retry_num-1)
 		else:
-			# log_str(DM_NETWORK_ERROR_INFO.format(self.class_name,options["url"],e))
+			# logger(DM_NETWORK_ERROR_INFO.format(self.class_name,options["url"],e))
 			print("网络请求出错 url:{}".format(options["url"]))
 			return 

@@ -23,7 +23,9 @@ class SauceNao:
 		# TODO(Coder-Sakura): 2020/07/13 15:52 后续使用配置类提供
 		# api_key = "f8c6827c4a9e6eef82267d5a0f1da48d067a87d1"
 		self.saucenao_api_key_list = bot_config.saucenao_api_key_list
-		self.search_image_url = "https://saucenao.com/search.php?db=999&output_type=2&\
+
+		self.saucenao_db_index = 999
+		self.search_image_url = "https://saucenao.com/search.php?db={}&output_type=2&\
 					testmode=1&numres=16&api_key={}&url={}"
 		# 反代直链请求头
 		self.headers = { 

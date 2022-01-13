@@ -23,7 +23,7 @@ def init_config():
     config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                 "..","..","config.yaml")
     default_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                "..","..","temp","default.yaml")
+                "..","..","resource","temp","default.yaml")
     if not os.path.exists(config_path):
         with open(config_path,"w") as f1:
             with open(default_path) as f2:
@@ -66,24 +66,6 @@ ERROR    40 logger.error()
 CRITICAL 50 logger.critical()
 """
 
-# TODO 完成2.0调整后注释掉该func,仅留档 改使用logger
-def log_str(*args, level:str="info")->None:
-    """
-    :params level: 日志等级
-        DEBUG    10
-        INFO     20
-        SUCCESS  25
-        WARNING  30
-        ERROR    40
-        CRITICAL 50
-    """
-    if level == "debug" and not config_yaml["Debug"]:
-        return
-
-    global logger
-    for i in args:
-        eval("logger.{}(i)".format(level))
-        # logger.debug(i)
 
 """
 使用@logger.catch可以直接进行 Traceback 的记录

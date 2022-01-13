@@ -43,9 +43,9 @@ class SysInfo:
                 }
             except PermissionError as e:
                 name = name.split(":")[0],
-                disk_info.append("磁盘:{}|{} 使用率: {}".format(name,"设备未就绪","设备未就绪"))
+                disk_info.append("磁盘:{} | {} 使用率: {}".format(name,"设备未就绪","设备未就绪"))
             else:
-                disk_info.append("磁盘:{}|{} 使用率: {}%".format(info["name"],info["total"],info["disk_usage"]))
+                disk_info.append("磁盘:{} | {} 使用率: {}%".format(info["name"],info["total"],info["disk_usage"]))
 
         DISK_TEXT = "DISK:\n" + "\n".join(disk_info)
         return DISK_TEXT

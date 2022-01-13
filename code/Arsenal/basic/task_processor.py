@@ -11,7 +11,7 @@
 import time
 
 
-from Arsenal.basic.db_pool import DBClient
+from Arsenal.basic.bot_tool import tool
 from Arsenal.basic.log_record import logger
 from Arsenal.basic.msg_temp import TASK_PROCESSOR_TEMP
 
@@ -27,7 +27,7 @@ class TaskProcessor:
 		:return: True or False
 		"""
         logger.debug(f"<insert_data> - {insert_data}")
-        result = DBClient.insert_records(cqp_data=None, table="tasks", **{"insert_data": insert_data})
+        result = tool.db.insert_records(cqp_data=None, table="tasks", **{"insert_data": insert_data})
         return result
         
     def get_tasks(self,nums=0,filter=None):
@@ -53,7 +53,7 @@ class TaskProcessor:
         else:
             filter_dict = {"task_status": "waiting"}
 
-        result = DBClient.select_records(table="tasks",limit=limit,**filter_dict)
+        result = tool.db.select_records(table="tasks",limit=limit,**filter_dict)
         result = sorted(result, key=lambda x: x["task_level"], reverse=True)
         return result
 

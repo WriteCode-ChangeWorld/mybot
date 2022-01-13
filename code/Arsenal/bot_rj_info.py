@@ -14,8 +14,8 @@ from lxml import etree
 
 
 # from basic.plus_res_directory import pdr
-from basic.BNConnect import baseRequest
-from basic.BNConnect import log_str
+from Arsenal.basic.BNConnect import baseRequest
+from Arsenal.basic.log_record import logger
 
 
 class RJ_Info:
@@ -44,8 +44,8 @@ class RJ_Info:
 
     def search_by_RJ(self,data):
         if data.get("product_id","") == "":
-            log_str("product_id is None")
-            log_str(data)
+            logger.info("product_id is None")
+            logger.info(data)
             return {}
 
         params = {"product_id":data["product_id"]}
@@ -54,14 +54,14 @@ class RJ_Info:
             try:
                 result = json.loads(resp.text)
             except json.decoder.JSONDecodeError as e:
-                log_str("JSONDecodeError: {}".format(e))
-                log_str(resp.text)
+                logger.info("JSONDecodeError: {}".format(e))
+                logger.info(resp.text)
                 return {}
             else:
                 product_info = {}
                 # RJ号信息为空
                 if result == []:
-                    log_str(product_info)
+                    logger.info(product_info)
                     return product_info
 
                 for k,v in result.items():
@@ -69,17 +69,17 @@ class RJ_Info:
                     product_info["product_name"] = v["work_name"]
                     product_info["RJ"] = k
                     product_info["dlsite_url"] = self.temp_url.format(k)
-                log_str(product_info)
+                logger.info(product_info)
                 return product_info
         else:
-            log_str("resp is None")
-            log_str("{} {}".format(self.rj_ajax,data))
+            logger.info("resp is None")
+            logger.info("{} {}".format(self.rj_ajax,data))
             return {}
                 
     def search_by_keyword(self,data):
         if data.get("keyword","") == "":
-            log_str("keyword is None")
-            log_str(data)
+            logger.info("keyword is None")
+            logger.info(data)
             return {}
 
         url = self.search_dl_url.format(data["keyword"])
@@ -89,13 +89,13 @@ class RJ_Info:
             try:
                 result = obj.xpath(self.search_result_expression)
             except Exception as e:
-                log_str("Xpath Parser Error: {}".format(e))
-                log_str(resp.text)
+                logger.info("Xpath Parser Error: {}".format(e))
+                logger.info(resp.text)
                 return {}
             else:
                 search_result_dict = {}
                 if result == []:
-                    log_str(search_result_dict)
+                    logger.info(search_result_dict)
                     return search_result_dict
                 
                 # 只取前三个
@@ -111,15 +111,15 @@ class RJ_Info:
                     search_result_dict[RJ]["url"] = url
                     search_result_dict[RJ]["RJ"] = RJ
 
-                log_str(search_result_dict)
+                logger.info(search_result_dict)
                 return search_result_dict
         else:
-            log_str("resp is None")
-            log_str("{} {}".format(url,data))
+            logger.info("resp is None")
+            logger.info("{} {}".format(url,data))
             return {}
 
-    def service_func(self):
-        pass
+    def parse(self):
+        return "Unexpected use..."
 
 Bot_RJ_Info = RJ_Info()
 """

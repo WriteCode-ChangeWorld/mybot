@@ -5,7 +5,7 @@
 @Author  :   Coder-Sakura
 @Version :   1.0
 @Contact :   1508015265@qq.com
-@Desc    :   None
+@Desc    :   Mybot消息-生命周期事件处理
 '''
 
 # here put the import lib
@@ -19,30 +19,26 @@ from flask import Flask, request, jsonify
 
 
 from executor import Executor
-from users_info import UInfo
-from msg_printers import CHURCH_IDENTIFY_MSG
-# 全局配置文件
-from config import bot_config
-from Arsenal.basic.thread_pool import ThreadPool,callback
+# from Arsenal.basic.db_pool import DBClient
+from Arsenal.basic.bot_tool import tool
+from Arsenal.basic.msg_temp import CHURCH_IDENTIFY_MSG
 
-
-# 建议定义到开头,不用去找msg_printer
-CHURCH_IDENTIFY_MSG = [
-	{"code": -100, "description":"识别到心跳包或其他未知原因"},
-	{"code": -1, "description":"识别到用户处于黑名单列表,将忽略信息"},
-	{"code": 0, "description":"距离下次调用还有{}秒,当前非法调用:{}次"},
-	{"code": 1, "description":"识别到用户再次过快调用,请等待20秒再调用"},
-	{"code": 10, "description":"识别到用户状态正常"},
-	{"code": 200, "description":"识别通过,用户状态正常"},
-]
+# CHURCH_IDENTIFY_MSG = [
+# 	{"code": -100, "description":"识别到心跳包或其他未知原因"},
+# 	{"code": -1, "description":"识别到用户处于黑名单列表,将忽略信息"},
+# 	{"code": 0, "description":"距离下次调用还有{}秒,当前非法调用:{}次"},
+# 	{"code": 1, "description":"识别到用户再次过快调用,请等待20秒再调用"},
+# 	{"code": 10, "description":"识别到用户状态正常"},
+# 	{"code": 200, "description":"识别通过,用户状态正常"},
+# ]
 
 
 class Church:
-	# pope qqbot
+	"""Mybot消息-生命周期事件处理"""
+
 	def __init__(self):
 		self.eval_cqp_data = {}
 		self.fusion_data = {}
-		self.configer = UInfo()
 		# level 0 等待时间
 		self.waiting_time = 0
 		# level 1 惩罚时间
@@ -231,12 +227,13 @@ class Church:
 app = Flask(__name__)
 pope = Church()
 executor = Executor()
+
 # 需要加入全局变量
-search_image_group_list = bot_config.search_image_group_list
+# search_image_group_list = bot_config.search_image_group_list
 # search_image_group_list = []
-search_img_timeout_limit = 60
-def get_time():
-	return '[{}]'.format(time.strftime("%Y-%m-%d %H:%M:%S"))
+# search_img_timeout_limit = 60
+# def get_time():
+# 	return '[{}]'.format(time.strftime("%Y-%m-%d %H:%M:%S"))
 
 @app.route('/',methods=['POST'])
 def bot_function():
@@ -251,21 +248,23 @@ def bot_function():
 	# monitor对消息进行过滤,包括是否放行到executor以及添加黑名单,接触限制等
 
 # =================监听接口结束================
+
+# ===== 删除 =====
 # 计时器--搜图
 # 每60秒检查一次,定时清除处于搜图模式的空闲用户
 # 用户被清除需要提示,机器人往群聊发消息
-def cycle():
-	while True:
-		if search_image_group_list != []:
-			for u in search_image_group_list[::-1]:
-				if u["timestamp"] + search_img_timeout_limit < int(time.time()):
-				# if u["timestamp"] + 10 < int(time.time()):
-					print("{} Search Image List Remove: {}".format(get_time(),u))
-					search_image_group_list.remove(u)
-					# return search_img_timeout_msg
-		print("{} Search Image List Now: {}".format(get_time(),search_image_group_list))
-		time.sleep(30)
-		# time.sleep(5)
+# def cycle():
+# 	while True:
+# 		if search_image_group_list != []:
+# 			for u in search_image_group_list[::-1]:
+# 				if u["timestamp"] + search_img_timeout_limit < int(time.time()):
+# 				# if u["timestamp"] + 10 < int(time.time()):
+# 					print("{} Search Image List Remove: {}".format(get_time(),u))
+# 					search_image_group_list.remove(u)
+# 					# return search_img_timeout_msg
+# 		print("{} Search Image List Now: {}".format(get_time(),search_image_group_list))
+# 		time.sleep(30)
+# ===== 删除 =====
 
 def flask_app():
 	app.config['JSON_AS_ASCII'] = False
@@ -273,26 +272,31 @@ def flask_app():
 
 
 if __name__ == '__main__':
+	flask_app()
+
+
+	# ===== 删除 =====
     # app.config['JSON_AS_ASCII'] = False
     # app.run( port='5000')
     # 任务队列,启动多线程
-	task_list = ["cycle","flask_app"]
-	thread_list = []
-	for t in task_list:
-		t = Thread(target=eval(t))
-		t.setDaemon(True)
-		thread_list.append(t)
+	# task_list = ["cycle","flask_app"]
+	# thread_list = []
+	# for t in task_list:
+	# 	t = Thread(target=eval(t))
+	# 	t.setDaemon(True)
+	# 	thread_list.append(t)
 
-	for t in thread_list:
-		t.start()
+	# for t in thread_list:
+	# 	t.start()
+	# ===== 删除 =====
 
 	# setDaemon设置为True,主线程执行完毕后会将子线程回收掉
 	# True表示该线程是不重要的,进程退出时不需要等待这个线程执行完成。
 	# False表示主进程执行结束时不会回收子线程
 	# 不采用join方法,采用isAlive来判断子线程是否完成
-	while 1:
-		alive = False
-		for i in thread_list:
-			alive = alive or i.isAlive()
-		if not alive:
-			break
+	# while 1:
+	# 	alive = False
+	# 	for i in thread_list:
+	# 		alive = alive or i.isAlive()
+	# 	if not alive:
+	# 		break

@@ -40,11 +40,11 @@ class Phantom_Img:
         return fontsize
 
     def main(self,img1_path):
-        # 里图: 手机qq点开显示 上层
+        # 里图
         img1 = Image.open(img1_path)
         img1_size = img1.size
-        # 手机qq未点开显示 下层
-        # 表图: 根据里图 新建一个图片并居中写入文字
+
+        # 表图: 根据里图 新建一个画布 居中写入文字
         img2 = Image.new('RGB',img1.size)
         draw = ImageDraw.Draw(img2)
         # 调整表图字体
@@ -145,6 +145,13 @@ if __name__ == "__main__":
     # from bot_phantom_img import Bot_Phantom_Img
     # img1_path = r'D:\Code\mybot\code\res\Phantom_Img\85071750_p0.jpg'
     # img1_path = r'D:\Code\mybot\code\res\Phantom_Img\82028936_p0.jpg'
-    img1_path = r'C:\Users\lenovo\Desktop\校验集-收藏\83887426_p0.png'
+    img1_path = r'C:\Users\lenovo\Desktop\校验集-收藏\76530353_p0.jpg'
     Bot_Phantom_Img = Phantom_Img() 
     Bot_Phantom_Img.main(img1_path)
+
+
+"""
+from Arsenal.bot_phantom_img import Bot_Phantom_Img
+img1_path = r'C:\Users\lenovo\Desktop\校验集-收藏\76530353_p0.jpg'
+Bot_Phantom_Img.main(img1_path)
+"""

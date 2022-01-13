@@ -28,8 +28,23 @@ TOOL_TEMP = {
     "debug_status": "DEBUG STATUS: {}",
     "config_path_info": "MybotConfigFilePath - {}",
     "config_info": "MybotConfig - {}",
-    "cq_http_send_group_url": "http://{}:{}/send_group_msg",
-    "cq_http_send_private_url": "http://{}:{}/send_private_msg"
+
+    # 消息发送 - 群
+    "cq_http_send_group_url": "{}/send_group_msg",
+    # 消息发送 - 私
+    "cq_http_send_private_url": "{}/send_private_msg",
+    # 消息发送(合并) - 群
+    "cq_seng_group_forward_msg": "{}/send_group_forward_msg",
+    # 获取消息
+    "cq_get_msg": "{}/get_msg",
+    # 撤回消息 - 撤回其他人的群消息需管理员权限
+    "cq_delete_msg": "{}/delete_msg",
+    # 获取群列表
+    "cq_get_group_list": "{}/get_group_list",
+    # 获取群信息
+    "cq_get_group_info": "{}/get_group_info",
+    # 处理加群请求
+    "cq_set_group_add_request": "{}/set_group_add_request"
 }
 
 # basic:db_pool
@@ -74,7 +89,7 @@ TASK_PROCESSOR_TEMP = {
     "NOT_DATETIME_DATA": "<{}> is not DATETIME data"
 }
 
-# basic:fileHandler
+# basic:file_handler
 # FILEIO_ERROR_INFO = {
 #     "loadYamlErrorInfo": "",
 #     "YamlPath": ""

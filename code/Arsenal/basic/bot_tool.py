@@ -10,16 +10,16 @@
 # here put the import lib·
 import os
 
-from Arsenal.basic.BNConnect import baseRequest
-# from BNConnect import baseRequest
-from Arsenal.basic.fileHandler import loadFile
+from Arsenal.basic.db_pool import DBClient
 from Arsenal.basic.log_record import logger
+from Arsenal.basic.file_handler import loadFile
+from Arsenal.basic.BNConnect import baseRequest
 from Arsenal.basic.msg_temp import CONFIG_CQ_CODE,TOOL_TEMP
 
 config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
 			"..","..","config.yaml")
 default_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-			"..","..","temp","default.yaml")
+			"..","..","temp","resource","default.yaml")
 
 
 def init_config():
@@ -37,23 +37,34 @@ class Config:
 	全局变量配置
 	"""
 	def __init__(self):
+		# 初始化
 		self.config = init_config()
+		self.level = self.read_level_info()
+		# 统一使用bot_tool的db
+		self.db = DBClient
 
-		# 初始化log
+		# ===== 初始化log ===== 
 		logger.info(TOOL_TEMP["load_config_success"])
 		logger.warning(TOOL_TEMP["debug_status"].format(self.config['Debug']))
 		logger.debug(TOOL_TEMP["config_info"].format(self.config))
 		logger.debug(TOOL_TEMP["config_path_info"].format(config_path))
 
 		# 通信
-		self.coolq_http_api_ip = self.get_items('["Bot"]["coolq_http_api_ip"]')
-		self.coolq_http_api_port = self.get_items('["Bot"]["coolq_http_api_port"]')
-		self.send_group_url = TOOL_TEMP["cq_http_send_group_url"].format(self.coolq_http_api_ip,self.coolq_http_api_port)
-		self.send_private_url = TOOL_TEMP["cq_http_send_private_url"].format(self.coolq_http_api_ip,self.coolq_http_api_port)
+		# HTTP or WebSocket
+		self.protocol = "http://" # or ws://
+		self.coolq_http_api_ip = self.get_items('["Bot"]["http"]["coolq_http_api_ip"]')
+		self.coolq_http_api_port = self.get_items('["Bot"]["http"]["coolq_http_api_port"]')
+		self.comm_address = f"{self.protocol}{self.coolq_http_api_ip}:{self.coolq_http_api_port}"
 
+		self.send_group_url = TOOL_TEMP["cq_http_send_group_url"].format(self.comm_address)
+		self.send_private_url = TOOL_TEMP["cq_http_send_private_url"].format(self.comm_address)
+
+		# admin uid
+		self.admin = int(self.get_items('["Bot"]["admin"]["uid"]'))
+
+		# ===== PLUGIN =====
 		# saucenao
 		self.saucenao_api_key = self.get_items('["Plugin"]["saucenao"]["api_key"]')
-
 
 		# 标志位
 		# PLUGIN_BLOCK
@@ -63,8 +74,8 @@ class Config:
 		# 主动式插件消息未命中解析规则
 		# 被动式插件跳过自身
 		self.PLUGIN_IGNORE = 1
+		# ===== PLUGIN =====
 
-	# get value from obj by value_path
 	def get_items(self,value_path="",obj="self.config"):
 		"""
 		获取配置文件中value
@@ -81,7 +92,21 @@ class Config:
 		except:     
 			return None
 
-	# === send_group_msg ===
+	def reload_bot_config(self):
+		"""重新加载配置文件"""
+		return init_config()
+
+	def read_level_info(self):
+		"""加载配置文件中的权限设置"""
+		return {
+			"general_user_level": self.config["Level"]["user"]["general"],
+			"vip_user_level": self.config["Level"]["user"]["vip"],
+			"admin_user_level": self.config["Level"]["user"]["admin"],
+			"general_group_level": self.config["Level"]["group"]["general"],
+			"vip_group_level": self.config["Level"]["group"]["vip"]
+		}
+
+	# === API start===
 	def send_group_msg(self,params,url=None):
 		"""
 		私聊先留空
@@ -91,7 +116,6 @@ class Config:
 			url = self.send_group_url
 		return baseRequest({"url":url},params=params)
 
-	# === send_private_msg ===
 	def send_private_msg(self,params,url=None):
 		"""
 		发送私聊信息到go-cqhttp接口
@@ -99,7 +123,49 @@ class Config:
 		if not url:
 			url = self.send_private_url
 		return baseRequest({"url":url},params=params)
-		# return requests.get(url,parmas=parmas)
+
+	def send_cq_client(self,params,api=None,url=None):
+		"""
+		使用api/url向客户端发送params消息,
+		"""
+		if url:
+			api_url = url
+
+		if api:
+			api_url = TOOL_TEMP[api]
+
+		return baseRequest({"url": api_url}, params=params)
+
+	def auto_report_err(self,err_msg,channel="cq"):
+		"""
+		向管理员实时汇报err信息
+		"""
+		status = {}
+		# 选择qq通知需在config.yaml中填写
+		# 路径为 ["Bot"]["admin"]["uid"]
+		if channel == "cq":
+			params = self.private_msg_temp(
+				self.admin,
+				err_msg
+			)
+			status = self.send_private_msg(params=params)
+			logger.info(f"<status> - {status}")
+			return status
+	
+	# === API end===
+	# === msg_params start ===
+	def auto_choice_msgtemp(self,eval_cqp_data,msg):
+		"""根据消息类型返回对应模板"""
+		if eval_cqp_data["message_type"] == "group":
+			group_id = eval_cqp_data["group_id"]
+			return self.group_msg_temp(group_id, msg)
+
+		elif eval_cqp_data["message_type"] == "private":
+			user_id = eval_cqp_data["user_id"]
+			return self.group_msg_temp(user_id, msg)
+
+		else:
+			return {}
 
 	def group_msg_temp(self,group_id,msg):
 		"""
@@ -127,7 +193,9 @@ class Config:
 		}
 		return user_msg
 
+	# === msg_params end ===
 	# === CQ code start ===
+
 	def CQ_IMG_URL(self,img_url):
 		"""
 		CQ码: 网络图片链接
@@ -162,6 +230,7 @@ class Config:
 		:parmas audio_path: 本地语音路径
 		"""
 		return CONFIG_CQ_CODE["reply_local_audio"].format(audio_path)
+	
 	# === CQ code end ===
 
 

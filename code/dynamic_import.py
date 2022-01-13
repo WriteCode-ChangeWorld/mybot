@@ -19,6 +19,8 @@ from Arsenal.basic.log_record import logger
 
 
 class Dynamic_Load:
+    """消息 - 插件解析器"""
+    
     def __init__(self):
         self.bot_name = type(self).__name__
         # 插件路径表达式
@@ -47,7 +49,7 @@ class Dynamic_Load:
             :param pathname: 
                 要导入的模块目录的相对路径,只要符合glob路径表达式写法即可
             :param recursive: 
-                True则匹配pathname下任何文件和子目录下的文件
+                True则迭代匹配pathname下子目录
             :param start_str: 
                 条件2:返回符合以start_str开头的类
             :param reimport: 
@@ -114,10 +116,10 @@ class Dynamic_Load:
         return module_dicts
  
     @logger.catch
-    def plugin_selector(self,msg):
+    def plugin_selector(self,eval_cqp_data):
         """
         消息解析器
-        :params msg: 客户端传入的消息
+        :params eval_cqp_data: 客户端消息体
         :return : 
         """
         if not self.module_dicts:
@@ -129,14 +131,17 @@ class Dynamic_Load:
         for module_name,module_addr in self.module_dicts.items():
             if hasattr(module_addr[module_name],"parse"):
                 try:
-                    result = module_addr[module_name].parse(msg)
+                    # 先判断用户或群组权限是否大于等于插件权限
+                    pass
+                
+                    result = module_addr[module_name].parse(eval_cqp_data)
 
                     # === 调试使用 ===
                     # result = tool.PLUGIN_BLOCK
                     # === 调试使用 ===
                 except Exception as e:
                     logger.warning(f"<Exception> - {e}")
-                    logger.warning(f"<msg> - {msg}. <module> - {module_addr[module_name]}")
+                    logger.warning(f"<eval_cqp_data> - {eval_cqp_data}. <module> - {module_addr[module_name]}")
                     result = tool.PLUGIN_IGNORE
             else:
                 logger.warning("module:{} not func:parse.Skip".format(module_name))
@@ -145,7 +150,7 @@ class Dynamic_Load:
             if result:
                 logger.debug(f"<result> - {result}")
                 # 未命中解析规则或空值
-                if result == tool.PLUGIN_IGNORE or result == None:
+                if result == tool.PLUGIN_IGNORE or not result:
                     logger.info(f"Miss Hit Module: {module_name}")
                     continue
                 # 解析成功后跳出
@@ -158,7 +163,7 @@ class Dynamic_Load:
                     continue
             logger.info("TEST TEST TEST")
         else:
-            logger.info(f"<{msg}> Not Hit Modules")
+            logger.info(f"<{eval_cqp_data}> Not Hit Modules")
             return self.error_code_list["NHM"]
        
     # TEST for dynamic import

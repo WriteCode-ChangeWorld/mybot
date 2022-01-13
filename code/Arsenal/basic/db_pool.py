@@ -132,7 +132,8 @@ class db_client:
         :return: {} or {result}
 
         DBClient.select_records(table="messages",limit=1,**{"group_name":"测试群组"})
-        DBClient.select_records(**{"uid": 1508015265,"gid": 835006})
+        DBClient.select_records(**{"uid": 123,"gid": 835006})
+        DBClient.select_records(**{"uid": 123,"gid": ""})
         """
         # 拼接额外参数
         cond = " AND ".join([f"{k} = {repr(v)}" if isinstance(v,str) else f"{k} = {v}" for k,v in kwargs.items()])
@@ -172,13 +173,11 @@ class db_client:
         
         # 返回所有查询结果
         if len(res) != 0:
-            print("in")
             if limit == 0:
                 return res
             else:
                 return res[:limit]
         else:
-            print("out")
             return []
 
     def insert_records(self,
@@ -366,4 +365,4 @@ class db_client:
             cur.close()
             conn.close()
 
-DBClient = db_client()
+DBClient = db_client()   
