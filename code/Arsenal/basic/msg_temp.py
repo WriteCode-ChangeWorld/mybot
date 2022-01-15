@@ -12,6 +12,17 @@ __author__:Coder_Sakura
 
 
 # ===== basic start =====
+USER_MSG_TEMP = {
+    "qqBlocker_user_msg": "[私]收到来自屏蔽用户{}的信息: {}. 已丢弃",
+    "qqBlocker_group_msg": "[群]收到群:{} 屏蔽用户{} 的信息: {}. 已丢弃",
+    "general_user_msg": "[私]收到用户{} 的消息: {}",
+    "general_group_msg": "[群]收到群:{} 用户:{} 的消息: {}",
+    "general_unknown_msg": "[unknown]收到群:{} 用户:{} 的消息: {}",
+    "limit_user_msg": "[私][level=1]收到用户:{} 的消息: {}",
+    "limit_group_msg": "[群][level=1]收到群:{} 用户:{} 的消息: {}"
+}
+
+
 # basic:CQ码
 CONFIG_CQ_CODE = {
     "reply_img": "[CQ:image,file={}]",
