@@ -1,7 +1,11 @@
 # Bot Config
 Bot :
-  coolq_http_api_ip : "127.0.0.1"
-  coolq_http_api_port : "5700"
+  # HTTP通信
+  http :
+    coolq_http_api_ip : "127.0.0.1"
+    coolq_http_api_port : "5700"
+
+  # Mysql连接信息
   mysql :
     db_host : "127.0.0.1"
     db_port : 3306
@@ -9,6 +13,26 @@ Bot :
     db_passwd : "passwd"
     db_database : "mybot"
     db_charset : "utf8mb4"
+
+  # 管理员信息配置
+  admin :
+    uid : your_uid
+
+
+# 用户管控 不建议改动
+Level :
+  # 用户权限
+  user :
+    general : 10
+    vip : 50
+    admin : 999
+  group :
+    general : 10
+    vip : 50
+  user_limit: 
+    enable: True  # or False
+    seconds: 10   # user_limit_cycle
+
 
 
 # Plugin Config

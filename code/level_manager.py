@@ -19,11 +19,18 @@ class UserData:
 		self.kwargs = kwargs
  
 	def __enter__(self):
-		result:list = tool.db.select_records(**self.kwargs)
-		if result: 
+		result:dict = tool.db.select_records(**self.kwargs)[0]
+		if result:
 			return result
+		# 新用户
 		else:
-			return tool.db.insert_records()
+			# 判断是否在里群(level>=50)
+			group_level = int(tool.db.select_records(table="group_chats", **{"gid":self.kwargs["gid"]})["group_level"])
+			if group_level >= tool.level["vip_group_level"]:
+				result:dict = tool.db.insert_records(**{"level": tool.level["vip_user_level"]})
+			else:
+				result:dict = tool.db.insert_records()
+			return result
 
 	def __exit__(self):
 		pass
@@ -39,7 +46,7 @@ class Monitor:
 
 	# TODO(Coder-Sakura): 2020/07/12 16:09 限制数据采集
 	def filter_msg(self, eval_cqp_data):
-		"""
+		""" 
 		是否过滤消息
 		:paramas eval_cqp_data: cq数据包
 		:return : 是 - True / 否 - False
@@ -63,7 +70,7 @@ class Monitor:
 				elif eval_cqp_data["message_type"] == "private":
 					logger.info(USER_MSG_TEMP["qqBlocker_user_msg"].format(uid,msg))
 				return True
-			# level = 1
+			# level = 1 × 没有level 1
 			elif int(user_info["user_level"]) == 1:
 				if eval_cqp_data["message_type"] == "group":
 					logger.info(USER_MSG_TEMP["limit_group_msg"].format(gid,uid,msg))
@@ -71,15 +78,21 @@ class Monitor:
 					logger.info(USER_MSG_TEMP["limit_user_msg"].format(uid,msg))
 				return True
 			# limit:user_call_count
-			else:
-				if eval_cqp_data["message_type"] == "group":
-					logger.info(USER_MSG_TEMP["general_group_msg"].format(gid,uid,msg))
-				elif eval_cqp_data["message_type"] == "private":
-					logger.info(USER_MSG_TEMP["general_user_msg"].format(uid,msg))
-				else:
-					logger.info(USER_MSG_TEMP["general_unknown_msg"].format(gid,uid,msg))
-				return False
 
+			# 防止无返回值 默认不过滤False
+			if eval_cqp_data["message_type"] == "group":
+				logger.info(USER_MSG_TEMP["general_group_msg"].format(gid,uid,msg))
+			elif eval_cqp_data["message_type"] == "private":
+				logger.info(USER_MSG_TEMP["general_user_msg"].format(uid,msg))
+			else:
+				logger.info(USER_MSG_TEMP["general_unknown_msg"].format(gid,uid,msg))
+			return False
+
+	def user_limit(self):
+		"""
+		普通用户调用频率限制
+		"""
+		pass
 
 	def change_level(self, level, **kwargs):
 		"""

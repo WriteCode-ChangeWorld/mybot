@@ -19,15 +19,22 @@ Bot :
     uid : 3012797743
 
 
-# 用户及群组默认权限 不建议改动
+# 用户管控 不建议改动
 Level :
+  # 用户权限
   user :
     general : 10
     vip : 50
     admin : 999
+  # 群组权限
   group :
     general : 10
     vip : 50
+  # 普通用户调用频率限制
+  user_limit: 
+    enable: True  # or False
+    seconds: 10   # user_limit_cycle
+
 
 
 # Plugin Config

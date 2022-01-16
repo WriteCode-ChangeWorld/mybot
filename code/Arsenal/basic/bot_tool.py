@@ -39,6 +39,7 @@ class Config:
 	def __init__(self):
 		# 初始化
 		self.config = init_config()
+		self.user_limit_flag = self.config["Level"]["user_limit"]["enable"]
 		self.level = self.read_level_info()
 		# 统一使用bot_tool的db
 		self.db = DBClient
@@ -66,7 +67,7 @@ class Config:
 		# saucenao
 		self.saucenao_api_key = self.get_items('["Plugin"]["saucenao"]["api_key"]')
 
-		# 标志位
+		# 标志位 - 实验性
 		# PLUGIN_BLOCK
 		# 主动式插件消息命中解析规则返回
 		self.PLUGIN_BLOCK = 0
@@ -99,11 +100,11 @@ class Config:
 	def read_level_info(self):
 		"""加载配置文件中的权限设置"""
 		return {
-			"general_user_level": self.config["Level"]["user"]["general"],
-			"vip_user_level": self.config["Level"]["user"]["vip"],
-			"admin_user_level": self.config["Level"]["user"]["admin"],
-			"general_group_level": self.config["Level"]["group"]["general"],
-			"vip_group_level": self.config["Level"]["group"]["vip"]
+			"general_user_level": int(self.config["Level"]["user"]["general"]),
+			"vip_user_level": int(self.config["Level"]["user"]["vip"]),
+			"admin_user_level": int(self.config["Level"]["user"]["admin"]),
+			"general_group_level": int(self.config["Level"]["group"]["general"]),
+			"vip_group_level": int(self.config["Level"]["group"]["vip"])
 		}
 
 	# === API start===

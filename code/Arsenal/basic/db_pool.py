@@ -62,65 +62,12 @@ class db_client:
         cur = conn.cursor(DictCursor)
         return conn,cur
 
-    # TODO:与select_records合并后移除
-    def isExists_records(self,
-                cqp_data,
-                table="users",
-                **kwargs,
-        ):
-        """
-        检测table表中是否有符合kwargs条件的记录
-        DBClient.isExists_records(cqp_data,user_id=123,group_id=456)
-        :parans cqp_data: CQ端数据包
-        :parans table: 指定数据表
-        :params kwargs: 查询sql额外的参数组,如:
-            {"user_id": 123, "group_id": 456}
-        :return: True Or False
-        cqp_data={"user_id": 1508015265,"group_id": 835006}
-        DBClient.isExists_records(cqp_data,**{"uid": 1508015265,"gid": 835006})
-        """
-        # 拼接额外参数
-        cond = " AND ".join([f"{k} = {v}" for k,v in kwargs.items()])
-        # cond = ""
-        # for k,v in kwargs.items():
-        #     cond += f"AND {k} = {v} "
-        if not cond:
-            cond = "1 = 1"
-            # func_sql += cond
-
-        func_sql = DB_SQL_TEMP["isExists_sql"]
-        func_sql = func_sql.format(table,cond)
-        logger.debug(f"kwargs - {kwargs}")
-        logger.debug(f"cond - {cond}")
-        logger.debug(f"func_sql - {func_sql}")
-
-        # conn,cur = self.get_conn()
-        # try:
-        #     cur.execute(func_sql)
-        # except Exception as e:
-        #     logger.info(f"Exception - {e}")
-        #     logger.info(f"kwargs - {func_sql}")
-        #     logger.info(f"func_sql - {func_sql}")
-        #     return False
-        # else:
-        #     res = cur.fetchall()
-        #     logger.info(f"res length is {len(res)}")
-        #     logger.debug(f"res - {res}")
-        # finally:
-        #     cur.close()
-        #     conn.close()
-
-        # 若记录存在
-        # if res[0]["COUNT(1)"] >= 1:
-        #     return True
-        # else:
-        #     return False
-
     def select_records(self,
-                cqp_data=None,
-                table="users",
-                limit=10,
-                **kwargs)->list:
+            cqp_data=None,
+            table="users",
+            limit=10,
+            **kwargs
+            )->list:
         """
         精确查询,查询符合kwargs字典组条件的记录并返回
         
@@ -180,17 +127,17 @@ class db_client:
             cqp_data,
             table="users",
             **kwargs
-        )->bool:
+            )->dict:
         """
         插入数据
         :parans cqp_data: CQ端数据包
         :parans table: 指定数据表
         :params kwargs: 额外参数
-            insert_data -> 指定插入数据;
-            insert_data需保持有序,\
-                sql中的字段根据insert_data的key进行拼接
+            insert_data -> 指定插入数据,需要按照数据表顺序;
+            level -> 指定level;
         :return: True Or False
-        DBClient.insert_records(cqp_data={"user_id": 1508015265,"group_id": 835006})
+        DBClient.insert_records(cqp_data={"user_id": 123,"group_id": 456})
+        DBClient.insert_records(cqp_data={"user_id": 123,"group_id": 456}, **{"user_level":50})
         """
         # 无指定的插入数据,使用默认模板插入
         if not cqp_data and not kwargs.get("insert_data",""):
@@ -198,30 +145,28 @@ class db_client:
             user_data["user_id"] = [cqp_data["user_id"] if cqp_data.get("user_id") else cqp_data["sender"]["user_id"]][0]
             user_data["group_id"] = [cqp_data["group_id"] if cqp_data.get("group_id") else cqp_data["sender"]["group_id"]][0]
 
-            user_data.update(DB_INSERT_DEFAULT_TEMP["New_User"])
-
             now_time = datetime.datetime.now()
-            offset = datetime.timedelta(seconds=DB_INSERT_DEFAULT_TEMP["New_User"]["user_limit_cycle"])
+            # user_limit_cycle
+            offset = datetime.timedelta(seconds=int(tool.config["Level"]["user_limit"]["seconds"]))
             create_date = now_time.strftime('%Y-%m-%d %H:%M:%S')
             last_call_date = create_date
             cycle_expiration_time = (now_time + offset).strftime('%Y-%m-%d %H:%M:%S')
 
-            timestamp_data = {
-                "create_date": create_date,
-                "last_call_date": last_call_date,
-                "cycle_expiration_time": cycle_expiration_time
-            }
-            user_data.update(timestamp_data)
+            user_data["create_date"] = create_date
+            user_data["last_call_date"] = last_call_date
+            user_data["cycle_expiration_time"] = cycle_expiration_time
+
+            if kwargs.get("user_level",""):
+                user_data["user_level"] = kwargs["user_level"]
         else:
             user_data = kwargs["insert_data"]
-            
+             
         if isinstance(user_data,dict):
             user_data = tuple(user_data.values())
         else:
             logger.warning(f"<user_data> unlawful. -{user_data}")
-            return False
+            return {}
 
-        conn,cur = self.get_conn()
         
         if not cqp_data and kwargs.get("insert_data",""):
             sql_keys_str = ",".join(kwargs["insert_data"].keys())
@@ -234,6 +179,7 @@ class db_client:
         
         logger.debug(f"insert_sql - {insert_sql}")
         logger.debug(f"<user_data> - {user_data}")
+        conn,cur = self.get_conn()
         try:
             cur.execute(insert_sql,user_data)
             conn.commit()
@@ -242,10 +188,10 @@ class db_client:
             logger.warning(f"records insert fail.")
             logger.debug(f"Exception - {e}")
             logger.debug(f"rollback success.")
-            return False
+            return {}
         else:
             logger.debug(f"records insert success.")
-            return True
+            return user_data
         finally:
             cur.close()
             conn.close()
@@ -269,12 +215,12 @@ class db_client:
         """
         # 检测update_data是否存在
         if not kwargs.get("update_data"):
-            logger.warning(f"Null Value <update_data>")
+            logger.warning(f"Null Value <update_data> - {kwargs}")
             return False
 
         # 检测judge_data是否存在
         if not kwargs.get("judge_data"):
-            logger.warning(f"Null Value <judge_data>")
+            logger.warning(f"Null Value <judge_data> - {kwargs}")
             return False
         
         # 拼接更新数据及条件数据
@@ -303,10 +249,10 @@ class db_client:
             conn.rollback()
             logger.warning(f"records update fail.")
             logger.debug(f"Exception - {e}")
-            logger.info(f"rollback success.")
+            logger.debug(f"rollback success.")
             return False
         else:
-            logger.success(f"records update success.")
+            logger.debug(f"records update success.")
             return True
         finally:
             cur.close()
@@ -316,7 +262,7 @@ class db_client:
             cqp_data=None,
             table="users",
             **kwargs
-            ):
+            )->bool:
         """
         删除数据
         :parans cqp_data: CQ端数据包
@@ -354,10 +300,10 @@ class db_client:
             conn.rollback()
             logger.warning(f"records delete fail.")
             logger.debug(f"Exception - {e}")
-            logger.info(f"rollback success.")
+            logger.debug(f"rollback success.")
             return False
         else:
-            logger.success(f"records delete success.")
+            logger.debug(f"records delete success.")
             return True
         finally:
             cur.close()
