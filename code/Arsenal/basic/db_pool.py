@@ -18,6 +18,7 @@ from pymysql.cursors import DictCursor
 from Arsenal.basic.bot_tool import tool
 from Arsenal.basic.log_record import logger
 from Arsenal.basic.msg_temp import DB_TEMP,DB_SQL_TEMP,DB_INSERT_DEFAULT_TEMP
+from level_manager import UserData
 
 
 class db_client:
@@ -119,35 +120,30 @@ class db_client:
                 cqp_data=None,
                 table="users",
                 limit=10,
-                **kwargs):
+                **kwargs)->list:
         """
         精确查询,查询符合kwargs字典组条件的记录并返回
         
         :params cqp_data: CQ端数据包
         :params table:    指定数据表
         :params limit:    自定义返回记录数量, 0 -> ALL return
-        :params kwargs:   查询条件,只提供=
+        :params kwargs:   指定查询条件
             查询条件有字符串需要用引号包括
             {"user_id": 123, "group_id": 456}
         :return: {} or {result}
 
         DBClient.select_records(table="messages",limit=1,**{"group_name":"测试群组"})
-        DBClient.select_records(**{"uid": 123,"gid": 835006})
-        DBClient.select_records(**{"uid": 123,"gid": ""})
         """
         # 拼接额外参数
         cond = " AND ".join([f"{k} = {repr(v)}" if isinstance(v,str) else f"{k} = {v}" for k,v in kwargs.items()])
-        # cond = ""
-        # for k,v in kwargs.items():
-        #     cond += f"AND {k} = {v} "
         if not cond:
             cond = "1 = 1"
 
         func_sql = DB_SQL_TEMP["select_sql"]
         # 0 -> ALL
-        if int(limit) > 0 and isinstance(limit,int):
+        if isinstance(limit,int) and int(limit) > 0:
             func_sql += f"LIMIT {limit}"
-        elif int(limit) < 0 and isinstance(limit,int):
+        elif isinstance(limit,int) and int(limit) < 0:
             limit = 10
             func_sql += f"LIMIT 10"
 
@@ -162,10 +158,10 @@ class db_client:
             logger.warning(f"Exception - {e}")
             logger.info(f"func_sql - {func_sql}")
             logger.info(f"kwargs - {kwargs}")
-            return {}
+            return []
         else:
             res = cur.fetchall()
-            logger.info(f"found {len(res)} recods")
+            logger.debug(f"found {len(res)} recods")
             logger.debug(f"res - {res}")
         finally:
             cur.close()
@@ -184,22 +180,24 @@ class db_client:
             cqp_data,
             table="users",
             **kwargs
-        ):
+        )->bool:
         """
         插入数据
         :parans cqp_data: CQ端数据包
         :parans table: 指定数据表
         :params kwargs: 额外参数
-            insert_data->指定插入数据;insert_data需保持有序,\
+            insert_data -> 指定插入数据;
+            insert_data需保持有序,\
                 sql中的字段根据insert_data的key进行拼接
         :return: True Or False
         DBClient.insert_records(cqp_data={"user_id": 1508015265,"group_id": 835006})
         """
-        # 无指定插入数据,使用默认模板插入
+        # 无指定的插入数据,使用默认模板插入
         if not cqp_data and not kwargs.get("insert_data",""):
-            uid = cqp_data["user_id"]
-            gid = cqp_data["group_id"]
-            user_data = {"uid": uid,"gid": gid}
+            user_data = DB_INSERT_DEFAULT_TEMP["New_User"]
+            user_data["user_id"] = [cqp_data["user_id"] if cqp_data.get("user_id") else cqp_data["sender"]["user_id"]][0]
+            user_data["group_id"] = [cqp_data["group_id"] if cqp_data.get("group_id") else cqp_data["sender"]["group_id"]][0]
+
             user_data.update(DB_INSERT_DEFAULT_TEMP["New_User"])
 
             now_time = datetime.datetime.now()
@@ -243,10 +241,10 @@ class db_client:
             conn.rollback()
             logger.warning(f"records insert fail.")
             logger.debug(f"Exception - {e}")
-            logger.info(f"rollback success.")
+            logger.debug(f"rollback success.")
             return False
         else:
-            logger.success(f"records insert success.")
+            logger.debug(f"records insert success.")
             return True
         finally:
             cur.close()
@@ -256,14 +254,14 @@ class db_client:
             cqp_data=None,
             table="users",
             **kwargs
-            ):
+            )->bool:
         """
         更新数据
         :parans cqp_data: CQ端数据包
         :parans table:    指定数据表
         :parans kwargs:   额外参数
-            update_data   更新数据
-            judge_data    判断条件,只提供=
+            update_data   更新后的数据
+            judge_data    指定判断条件
             **{"update_data":{...}, "judge_data":{...}}
         :return: True Or False
 

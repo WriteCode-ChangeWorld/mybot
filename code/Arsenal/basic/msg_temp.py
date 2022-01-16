@@ -81,12 +81,17 @@ DB_SQL_TEMP = {
 # basic:db_pool users表默认模板
 DB_INSERT_DEFAULT_TEMP = {
     "New_User": {
+        "user_id": "",
+        "group_id": "",
         "user_level": 10,
         "user_limit_cycle": 10,
         "user_limit_count": 3,
         "user_call_count": 0,
         "magic_thing": 0,
-        "is_qqBlocked": 0
+        "is_qqBlocked": 0,
+        "create_date": "",
+        "last_call_date": "",
+        "cycle_expiration_time": ""
     }
 }
 

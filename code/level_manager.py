@@ -9,6 +9,7 @@
 
 # here put the import lib
 from asyncio.log import logger
+from pickle import LIST
 from Arsenal.basic.bot_tool import tool
 from Arsenal.basic.msg_temp import USER_MSG_TEMP
 
@@ -18,8 +19,9 @@ class UserData:
 		self.kwargs = kwargs
  
 	def __enter__(self):
-		if tool.db.isExists_records(): 
-			return tool.db.select_records(self.kwargs)
+		result:list = tool.db.select_records(**self.kwargs)
+		if result: 
+			return result
 		else:
 			return tool.db.insert_records()
 
@@ -68,6 +70,7 @@ class Monitor:
 				elif eval_cqp_data["message_type"] == "private":
 					logger.info(USER_MSG_TEMP["limit_user_msg"].format(uid,msg))
 				return True
+			# limit:user_call_count
 			else:
 				if eval_cqp_data["message_type"] == "group":
 					logger.info(USER_MSG_TEMP["general_group_msg"].format(gid,uid,msg))
