@@ -108,6 +108,7 @@ class Config:
 		}
 
 	# === API start===
+	# TODO 测试后删除 2022/1/17
 	def send_group_msg(self,params,url=None):
 		"""
 		私聊先留空
@@ -117,6 +118,7 @@ class Config:
 			url = self.send_group_url
 		return baseRequest({"url":url},params=params)
 
+	# TODO 测试后删除 2022/1/17
 	def send_private_msg(self,params,url=None):
 		"""
 		发送私聊信息到go-cqhttp接口
@@ -127,11 +129,13 @@ class Config:
 
 	def send_cq_client(self,params,api=None,url=None):
 		"""
-		使用api/url向客户端发送params消息,
+		获取go-cq接数据
 		"""
+		# 直接指定url
 		if url:
 			api_url = url
 
+		# 通过接口名
 		if api:
 			api_url = TOOL_TEMP[api]
 
@@ -153,48 +157,44 @@ class Config:
 			logger.info(f"<status> - {status}")
 			return status
 	
-	# === API end===
-	# === msg_params start ===
-	def auto_choice_msgtemp(self,eval_cqp_data,msg):
-		"""根据消息类型返回对应模板"""
-		if eval_cqp_data["message_type"] == "group":
-			group_id = eval_cqp_data["group_id"]
-			return self.group_msg_temp(group_id, msg)
-
-		elif eval_cqp_data["message_type"] == "private":
-			user_id = eval_cqp_data["user_id"]
-			return self.group_msg_temp(user_id, msg)
-
+	def auto_send_msg(self, mybot_data)->bool:
+		"""
+		根据mybot_data进行群组/私聊信息发送
+		"""
+		# 群聊信息
+		if mybot_data["sender"]["type"] == "group":
+			params = self.group_msg_temp(mybot_data)
+			self.send_cq_client(params, api="cq_http_send_group_url")
+		# 私聊信息
+		elif mybot_data["sender"]["type"] == "private":
+			params = self.private_msg_temp(mybot_data)
+			self.send_cq_client(params, api="cq_http_send_private_url")
 		else:
-			return {}
+			return False
 
-	def group_msg_temp(self,group_id,msg):
+		return True
+
+	def group_msg_temp(self, mybot_data)->list:
 		"""
 		群聊消息
-		:parmas group_id: 群组id
-		:parmas msg: 群组消息
-		return CQ数据包
 		"""
 		group_msg = {
-			"group_id":group_id,
-			"message":msg,
+			"group_id": mybot_data["sender"]["group_id"],
+			"message": mybot_data["message"]
 		}
 		return group_msg
 
-	def private_msg_temp(self,user_id,msg):
+	def private_msg_temp(self, mybot_data)->list:
 		"""
 		私聊消息
-		:parmas user_id: 用户id
-		:parmas msg: 私聊消息
-		return CQ数据包
 		"""
 		user_msg = {
-			"user_id":user_id,
-			"message":msg,
+			"user_id": mybot_data["sender"]["user_id"],
+			"message": mybot_data["message"]
 		}
 		return user_msg
 
-	# === msg_params end ===
+	# # === API end===
 	# === CQ code start ===
 
 	def CQ_IMG_URL(self,img_url):
