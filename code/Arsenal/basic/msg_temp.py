@@ -1,14 +1,11 @@
-"""
-__time__:2020年9月19日19:54:04
-__author__:Coder_Sakura
-模板消息(msg_temp)
-"""
-
-# TODO 2020年10月12日13:56:04
-# 更改模块名称为:msg_template
-# import sys
-# sys.path.append("Arsenal")
-# from Arsenal.bot_ascii2d_img import Ascii2d
+# -*- encoding: utf-8 -*-
+'''
+@File    :   msg_temp.py
+@Time    :   2020/09/19 19:54:04
+@Author  :   Coder-Sakura
+@Version :   1.0
+@Desc    :   模板消息
+'''
 
 
 # ===== basic start =====

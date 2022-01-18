@@ -15,17 +15,15 @@ from DBUtils.PooledDB import PooledDB
 from pymysql.cursors import DictCursor
 
 
-from Arsenal.basic.bot_tool import tool
-from Arsenal.basic.log_record import logger
+from Arsenal.basic.log_record import logger, init_config
 from Arsenal.basic.msg_temp import DB_TEMP,DB_SQL_TEMP,DB_INSERT_DEFAULT_TEMP
-from level_manager import UserData
 
 
 class db_client:
     def __init__(self):
-        self.config_yaml = tool.config
+        self.config = init_config()
         self.db_type = "mysql"
-        self.db_config = self.config_yaml["Bot"].get(self.db_type,"")
+        self.db_config = self.config["Bot"].get(self.db_type,"")
         if not self.db_config:
             logger.error(DB_TEMP["db_config_error"].format(self.db_type))
             exit()
@@ -140,14 +138,14 @@ class db_client:
         DBClient.insert_records(cqp_data={"user_id": 123,"group_id": 456}, **{"user_level":50})
         """
         # 无指定的插入数据,使用默认模板插入
-        if not cqp_data and not kwargs.get("insert_data",""):
+        if not kwargs.get("insert_data",""):
             user_data = DB_INSERT_DEFAULT_TEMP["New_User"]
             user_data["user_id"] = [cqp_data["user_id"] if cqp_data.get("user_id") else cqp_data["sender"]["user_id"]][0]
             user_data["group_id"] = [cqp_data["group_id"] if cqp_data.get("group_id") else cqp_data["sender"]["group_id"]][0]
 
             now_time = datetime.datetime.now()
             # user_limit_cycle
-            offset = datetime.timedelta(seconds=int(tool.config["Level"]["user_limit"]["seconds"]))
+            offset = datetime.timedelta(seconds=int(self.config["Level"]["user_limit"]["seconds"]))
             create_date = now_time.strftime('%Y-%m-%d %H:%M:%S')
             last_call_date = create_date
             cycle_expiration_time = (now_time + offset).strftime('%Y-%m-%d %H:%M:%S')

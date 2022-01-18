@@ -129,7 +129,7 @@ class Config:
 
 	def send_cq_client(self,params,api=None,url=None):
 		"""
-		获取go-cq接数据
+		获取go-cq接口数据
 		"""
 		# 直接指定url
 		if url:
