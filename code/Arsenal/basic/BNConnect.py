@@ -16,17 +16,7 @@ requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 from Arsenal.basic.log_record import logger
 
-# 0502 暂时
-# import os
-# from loguru import logger
-# root_path = r"D:\Code\mybot\code\log"
-# # root_path = os.getcwd()
-# logger.add(
-#     os.path.join(root_path,"{time}.log"),
-#     encoding="utf-8",
-#     rotation="12:00"
-#     )
-# 0502
+
 
 headers = {
 	"Host": "www.pixiv.net",
@@ -43,7 +33,6 @@ headers = {
 # 		text = '[{}] {}'.format(time.strftime("%Y-%m-%d %H:%M:%S"),i)
 # 		# print(text,end=end)
 # 		logger.debug(text)
-
 
 def baseRequest(options,method="GET",data=None,params=None,retry_num=5):
 	'''
@@ -91,5 +80,5 @@ def baseRequest(options,method="GET",data=None,params=None,retry_num=5):
 			return baseRequest(options,data,params,retry_num=retry_num-1)
 		else:
 			# logger(DM_NETWORK_ERROR_INFO.format(self.class_name,options["url"],e))
-			print("网络请求出错 url:{}".format(options["url"]))
+			logger.info(f"网络请求出错 url: {options['url']}")
 			return 

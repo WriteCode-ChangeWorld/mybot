@@ -152,6 +152,6 @@ if __name__ == "__main__":
 
 """
 from Arsenal.bot_phantom_img import Bot_Phantom_Img
-img1_path = r'C:\Users\lenovo\Desktop\校验集-收藏\76530353_p0.jpg'
+img1_path = r"xxx.png"
 Bot_Phantom_Img.main(img1_path)
 """

@@ -22,7 +22,7 @@ requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 # cqp service
 # from error import error
 # from future.Arsenal.BNConnect import baseRequest
-# from future.Arsenal.BNConnect import log_str
+# from future.Arsenal.BNConnect import logger
 # from future.Arsenal.url_985so import so985
 
 # from future.Arsenal.url_dlj import LiDuanlian
@@ -31,7 +31,7 @@ requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 # dev环境
 from Arsenal.basic.plugin_res_directory import pdr
 from Arsenal.basic.BNConnect import baseRequest
-from Arsenal.basic.BNConnect import log_str
+from Arsenal.basic.log_record import logger
 # 2021年12月12日23:21:55
 # from Arsenal.basic.url_985so import so985
 # 导入上层temp模板
@@ -119,8 +119,8 @@ class WhatAnime:
             # resp = requests.get(img_url, headers=headers)
             file_type = resp.headers["Content-Type"].split("/")[-1]
         except Exception as e:
-            log_str("anime gif: Exception: {}".format(e))
-            log_str("anime gif: Error Url: {}".format(img_url))
+            logger.info("anime gif: Exception: {}".format(e))
+            logger.info("anime gif: Error Url: {}".format(img_url))
             return False
         else:
             # gif则下载图片到本地,并返回文件名称
@@ -188,23 +188,23 @@ class WhatAnime:
         except Exception as e:
             # res = error(eval_cqp_data)
             # return res
-            log_str(e)
-            log_str(data)
-            return {"error_msg": "WhatAnime返回数据有误！请重试"}
+            logger.info(e)
+            logger.info(data)
+            return {"error_msg": "WhatAnime返回数据有误!请重试"}
         else:
             # return resp
             resp.encoding = 'utf-8'
             try:
                 json_data = json.loads(resp.text)
             except json.decoder.JSONDecodeError as e:
-                log_str(e)
-                log_str(resp.text)
-                return {"error_msg": "网络出错惹！请重试"}
+                logger.info(e)
+                logger.info(resp.text)
+                return {"error_msg": "网络出错惹!请重试"}
 
             if json_data["error"] == "Failed to process image":
-                return {"error_msg": "WhatAnime无法处理图像！请重试"}
+                return {"error_msg": "WhatAnime无法处理图像!请重试"}
             elif json_data.get("result", "") == "":
-                return {"error_msg": "网络出错惹(json)！请重试"}
+                return {"error_msg": "网络出错惹(json)!请重试"}
             else:
                 return json_data
 
@@ -219,8 +219,8 @@ class WhatAnime:
         try:
             json_data = json.loads(resp.text)
         except Exception as e:
-            log_str("JSONDecodeError url: ".format(u))
-            return {"error_msg": "网络出错惹(json)！请重试"}
+            logger.info("JSONDecodeError url: ".format(u))
+            return {"error_msg": "网络出错惹(json)!请重试"}
         else:
             return json_data
 
@@ -311,7 +311,7 @@ class WhatAnime:
         options = {"url":"https://trace.moe/anilist/","headers":self.anilist_headers,"timeout":10}
         resp = baseRequest(options=options, method="POST", data=json.dumps(payload))
         if not resp:
-            log_str("resp is None|animeid: {}".format(anime_id))
+            logger.info("resp is None|animeid: {}".format(anime_id))
             return None
         
         anime_result = json.loads(resp.text)["data"]["Page"]["media"]
@@ -340,17 +340,17 @@ class WhatAnime:
         """
         temp = 'https://trace.moe/api/search?url='
         img_url = trace_url.replace(temp, "")
-        log_str("搜番图片: {}".format(img_url))
+        logger.info("搜番图片: {}".format(img_url))
         # 判断是否为gif
         decision_result = self.anime_gif(img_url)
         if decision_result:
             # 非gif
             if decision_result == img_url:
-                log_str("img | not gif")
+                logger.info("img | not gif")
                 result = self.anime_search_network(img_url)
             # gif
             else:
-                log_str("img | gif")
+                logger.info("img | gif")
                 new_gif_path = self.force_conver(decision_result)
                 with open(new_gif_path, "rb") as f:
                     params = {
@@ -364,7 +364,7 @@ class WhatAnime:
             # 并入msg_printer
             search_results = {
                 "group_id": eval_cqp_data.get('group_id',""),
-                "message": "网络爆炸惹~请重试！"
+                "message": "网络爆炸惹~请重试!"
             }
             return search_results,""
 
@@ -373,27 +373,27 @@ class WhatAnime:
             if result.get("error_msg","") != "":
                 search_results = {
                     "group_id": eval_cqp_data.get('group_id',""),
-                    "message": "网络爆炸惹~请重试！"
+                    "message": "网络爆炸惹~请重试!"
                 }
-                log_str("group_tra_anime | Have Error Msg")
-                log_str("error_msg: {}".format(result.get("error_msg","")))
+                logger.info("group_tra_anime | Have Error Msg")
+                logger.info("error_msg: {}".format(result.get("error_msg","")))
                 return search_results,""
             # anime_search_network | Failed to fetch image
             elif result.get("error","") != "":
                 search_results = {
                     "group_id": eval_cqp_data.get('group_id',""),
-                    "message": "Failed to fetch image~请重试！"
+                    "message": "Failed to fetch image~请重试!"
                 }
-                log_str("group_tra_anime | Failed to fetch image")
-                log_str("error: {} | url: {}".format(result.get("error",""),trace_url))
+                logger.info("group_tra_anime | Failed to fetch image")
+                logger.info("error: {} | url: {}".format(result.get("error",""),trace_url))
                 return search_results,""
         else:
             search_results = {
                 "group_id": eval_cqp_data.get('group_id',""),
-                "message": "网络爆炸惹~请重试！"
+                "message": "网络爆炸惹~请重试!"
             }
-            log_str("group_tra_anime | result is None")
-            log_str("result: {}".format(result))
+            logger.info("group_tra_anime | result is None")
+            logger.info("result: {}".format(result))
             return search_results,""
 
         # 向anilist发送请求
@@ -401,8 +401,8 @@ class WhatAnime:
         anime_id = whatanime_result["anilist"]
         anime_result = self.get_anilist_info(anime_id)
         anime_info = anime_result[0]
-        log_str("result: {}".format(result))
-        log_str("anime_result: {}".format(anime_result))
+        logger.info("result: {}".format(result))
+        logger.info("anime_result: {}".format(anime_result))
 
 
         # === 格式化并返回 ===
@@ -421,10 +421,10 @@ class WhatAnime:
             preview_url = whatanime_result["video"]
             # preview_url = so985().get_slink(preview_url)
             preview_url = preview_url.replace("http://","")
-            log_str("short url: {}".format(preview_url))
+            logger.info("short url: {}".format(preview_url))
         except Exception as e:
             preview_url = "链接获取失败"
-            log_str("short url error: {}".format(e))
+            logger.info("short url error: {}".format(e))
         
         
         # 动画名称
@@ -474,8 +474,8 @@ class WhatAnime:
                     str(recommen_name),self.download_pic(str(recommen_cover))
                 )
 
-        log_str("search_results: {}".format(search_results))
-        log_str("end_results: {}".format(end_results))
+        logger.info("search_results: {}".format(search_results))
+        logger.info("end_results: {}".format(end_results))
         return search_results,end_results
         # return search_results
 

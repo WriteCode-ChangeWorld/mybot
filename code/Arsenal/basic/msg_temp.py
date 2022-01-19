@@ -160,4 +160,10 @@ EXECUTOR_FUNCTION_LIST = [
 EXECUTOR_TASK_STATUS_INFO = {
     "info": "task_status:<{}> nums:<{}>"
 }
+
+# main:level_manager
+USER_LIMIT_TEMP = {
+    "temp1": "请等待{}秒后再尝试...",
+    "temp2": "请不要过快调用,至少等待{}秒后再使用"
+}
 # ===== main end =====

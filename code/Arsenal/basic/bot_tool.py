@@ -127,20 +127,6 @@ class Config:
 			url = self.send_private_url
 		return baseRequest({"url":url},params=params)
 
-	def send_cq_client(self,params,api=None,url=None):
-		"""
-		获取go-cq接口数据
-		"""
-		# 直接指定url
-		if url:
-			api_url = url
-
-		# 通过接口名
-		if api:
-			api_url = TOOL_TEMP[api]
-
-		return baseRequest({"url": api_url}, params=params)
-
 	def auto_report_err(self,err_msg,channel="cq"):
 		"""
 		向管理员实时汇报err信息
@@ -174,24 +160,46 @@ class Config:
 
 		return True
 
-	def group_msg_temp(self, mybot_data)->list:
+	def send_cq_client(self,params,api=None,url=None):
+		"""
+		获取go-cq接口数据
+		"""
+		# 直接指定url
+		if url:
+			api_url = url
+
+		# 通过接口名
+		if api:
+			api_url = TOOL_TEMP[api].format(self.comm_address)
+
+		return baseRequest({"url": api_url}, params=params)
+
+	def group_msg_temp(self, mybot_data)->dict:
 		"""
 		群聊消息
 		"""
+		if mybot_data["at"]:
+			mybot_data["message"] = self.CQ_AT(int(mybot_data["sender"]["user_id"])) + \
+				"\n" + mybot_data["message"]
 		group_msg = {
 			"group_id": mybot_data["sender"]["group_id"],
 			"message": mybot_data["message"]
 		}
+		logger.debug(f"<group_msg> - {group_msg}")
 		return group_msg
 
-	def private_msg_temp(self, mybot_data)->list:
+	def private_msg_temp(self, mybot_data)->dict:
 		"""
 		私聊消息
 		"""
+		if mybot_data["at"]:
+			mybot_data["message"] = self.CQ_AT(int(mybot_data["sender"]["user_id"])) + \
+				"\n" + mybot_data["message"]
 		user_msg = {
 			"user_id": mybot_data["sender"]["user_id"],
 			"message": mybot_data["message"]
 		}
+		logger.debug(f"<user_msg> - {user_msg}")
 		return user_msg
 
 	# # === API end===

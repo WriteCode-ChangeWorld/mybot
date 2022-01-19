@@ -128,9 +128,9 @@ class db_client:
             )->dict:
         """
         插入数据
-        :parans cqp_data: CQ端数据包
-        :parans table: 指定数据表
-        :params kwargs: 额外参数
+        :params cqp_data: CQ端数据包
+        :params table: 指定数据表
+        :params kwargs: 
             insert_data -> 指定插入数据,需要按照数据表顺序;
             level -> 指定level;
         :return: True Or False
@@ -145,11 +145,13 @@ class db_client:
 
             now_time = datetime.datetime.now()
             # user_limit_cycle
-            offset = datetime.timedelta(seconds=int(self.config["Level"]["user_limit"]["seconds"]))
+            user_limit_cycle = int(self.config["Level"]["user_limit"]["seconds"])
+            offset = datetime.timedelta(seconds=user_limit_cycle)
             create_date = now_time.strftime('%Y-%m-%d %H:%M:%S')
             last_call_date = create_date
             cycle_expiration_time = (now_time + offset).strftime('%Y-%m-%d %H:%M:%S')
 
+            user_data["user_limit_cycle"] = user_limit_cycle
             user_data["create_date"] = create_date
             user_data["last_call_date"] = last_call_date
             user_data["cycle_expiration_time"] = cycle_expiration_time
@@ -201,9 +203,9 @@ class db_client:
             )->bool:
         """
         更新数据
-        :parans cqp_data: CQ端数据包
-        :parans table:    指定数据表
-        :parans kwargs:   额外参数
+        :params cqp_data: CQ端数据包
+        :params table:    指定数据表
+        :params kwargs:   额外参数
             update_data   更新后的数据
             judge_data    指定判断条件
             **{"update_data":{...}, "judge_data":{...}}
@@ -263,9 +265,9 @@ class db_client:
             )->bool:
         """
         删除数据
-        :parans cqp_data: CQ端数据包
-        :parans table: 指定数据表
-        :parans kwargs: 额外参数
+        :params cqp_data: CQ端数据包
+        :params table: 指定数据表
+        :params kwargs: 额外参数
             judge_data 判断条件,只提供=
         :return: True Or False
 
