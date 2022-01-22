@@ -17,8 +17,8 @@ class UserData:
 			"arrange": {},
 			"user_info": {},
 			"sender": {
-				"user_id": self.kwargs.get("uid", 0),
-				"group_id": self.kwargs.get("gid", 0),
+				"user_id": int(self.kwargs.get("uid", 0)),
+				"group_id": int(self.kwargs.get("gid", 0)),
 				"type": self.kwargs.get("message_type", 0),
 			},
 			"at": self.kwargs.get("at", True),
@@ -33,7 +33,7 @@ class UserData:
 		# 新用户
 		if not select_result:
 			# 判断是否在里群(level>=50)
-			group_result = tool.db.select_records(table="group_chats", **{"gid":self.kwargs["gid"]})
+			group_result = tool.db.select_records(table="group_chats", **{"gid":self.kwargs.get("gid", 0)})
 			if group_result:
 				group_level = int(group_result.get("group_level", tool.level["general_group_level"]))
 			else:

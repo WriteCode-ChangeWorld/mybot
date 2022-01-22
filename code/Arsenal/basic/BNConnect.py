@@ -22,19 +22,18 @@ headers = {
 	"Host": "www.pixiv.net",
 	"referer": "https://www.pixiv.net/",
 	"origin": "https://accounts.pixiv.net",
-	"accept-language": "zh-CN,zh;q=0.9",	# 返回translation,中文翻译的标签组
+	"accept-language": "zh-CN,zh;q=0.9",	# 返回translation,中文翻译
 	"User-Agent": 'Mozilla/5.0 (Windows NT 10.0; WOW64) '
 		'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36',
 }
 
-# def log_str(*args,end=None):
-# 	global logger
-# 	for i in args:
-# 		text = '[{}] {}'.format(time.strftime("%Y-%m-%d %H:%M:%S"),i)
-# 		# print(text,end=end)
-# 		logger.debug(text)
 
-def baseRequest(options,method="GET",data=None,params=None,retry_num=5):
+def baseRequest(options,
+		method="GET",
+		data=None,
+		params=None,
+		retry_num=5
+		):
 	'''
 	:params options 请求参数
 		{"method":"get/post","url":"example.com"}
@@ -59,9 +58,12 @@ def baseRequest(options,method="GET",data=None,params=None,retry_num=5):
 	baseRequest(options = options)
 	这样baseRequest中使用的headers则是定制化的headers,而非默认headers
 	'''
-	# logger(options["url"])
 	base_headers = [options["headers"] if "headers" in options.keys() else headers][0]
 
+	if "pixiv" in options["url"] and not options["headers"]:
+		base_headers = headers
+
+	logger.debug(f"<options> - {options}")
 	try:
 		response = requests.request(
 				method,
@@ -76,9 +78,11 @@ def baseRequest(options,method="GET",data=None,params=None,retry_num=5):
 		response.encoding = "utf8"
 		return response
 	except Exception as e:
+		logger.info(f"<err> - network requests err | <Exception> - {e}")
 		if retry_num > 0:
+			time.sleep(0.1)
 			return baseRequest(options,data,params,retry_num=retry_num-1)
 		else:
-			# logger(DM_NETWORK_ERROR_INFO.format(self.class_name,options["url"],e))
-			logger.info(f"网络请求出错 url: {options['url']}")
+			logger.info(f"<options> - {options}")
+			logger.info(f"<err> - network requests err | no retry times")
 			return 

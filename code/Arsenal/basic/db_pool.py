@@ -61,7 +61,7 @@ class db_client:
         return conn,cur
 
     def select_records(self,
-            cqp_data=None,
+            mybot_data=None,
             table="users",
             limit=10,
             **kwargs
@@ -69,7 +69,7 @@ class db_client:
         """
         精确查询,查询符合kwargs字典组条件的记录并返回
         
-        :params cqp_data: CQ端数据包
+        :params mybot_data: mybot_data内部消息体
         :params table:    指定数据表
         :params limit:    自定义返回记录数量, 0 -> ALL return
         :params kwargs:   指定查询条件
@@ -122,26 +122,26 @@ class db_client:
             return []
 
     def insert_records(self,
-            cqp_data,
+            mybot_data=None,
             table="users",
             **kwargs
             )->dict:
         """
         插入数据
-        :params cqp_data: CQ端数据包
+        :params mybot_data: mybot_data内部消息体
         :params table: 指定数据表
         :params kwargs: 
             insert_data -> 指定插入数据,需要按照数据表顺序;
-            level -> 指定level;
+            level -> 指定用户level;
         :return: True Or False
-        DBClient.insert_records(cqp_data={"user_id": 123,"group_id": 456})
-        DBClient.insert_records(cqp_data={"user_id": 123,"group_id": 456}, **{"user_level":50})
+        DBClient.insert_records(mybot_data={"user_id": 123,"group_id": 456})
+        DBClient.insert_records(mybot_data={"user_id": 123,"group_id": 456}, **{"user_level":50})
         """
         # 无指定的插入数据,使用默认模板插入
         if not kwargs.get("insert_data",""):
-            user_data = DB_INSERT_DEFAULT_TEMP["New_User"]
-            user_data["user_id"] = [cqp_data["user_id"] if cqp_data.get("user_id") else cqp_data["sender"]["user_id"]][0]
-            user_data["group_id"] = [cqp_data["group_id"] if cqp_data.get("group_id") else cqp_data["sender"]["group_id"]][0]
+            _data = DB_INSERT_DEFAULT_TEMP["New_User"]
+            _data["user_id"] = int(mybot_data["sender"]["user_id"])
+            _data["group_id"] = int(mybot_data["sender"]["group_id"])
 
             now_time = datetime.datetime.now()
             # user_limit_cycle
@@ -151,24 +151,24 @@ class db_client:
             last_call_date = create_date
             cycle_expiration_time = (now_time + offset).strftime('%Y-%m-%d %H:%M:%S')
 
-            user_data["user_limit_cycle"] = user_limit_cycle
-            user_data["create_date"] = create_date
-            user_data["last_call_date"] = last_call_date
-            user_data["cycle_expiration_time"] = cycle_expiration_time
+            _data["user_limit_cycle"] = user_limit_cycle
+            _data["create_date"] = create_date
+            _data["last_call_date"] = last_call_date
+            _data["cycle_expiration_time"] = cycle_expiration_time
 
             if kwargs.get("user_level",""):
-                user_data["user_level"] = kwargs["user_level"]
+                _data["user_level"] = kwargs["user_level"]
         else:
-            user_data = kwargs["insert_data"]
+            _data = kwargs["insert_data"]
              
-        if isinstance(user_data,dict):
-            user_data = tuple(user_data.values())
+        if isinstance(_data, dict):
+            _data = tuple(_data.values())
         else:
-            logger.warning(f"<user_data> unlawful. -{user_data}")
+            logger.warning(f"<_data> unlawful. -{_data}")
             return {}
 
         
-        if not cqp_data and kwargs.get("insert_data",""):
+        if not mybot_data and kwargs.get("insert_data",""):
             sql_keys_str = ",".join(kwargs["insert_data"].keys())
         else:
             sql_keys_str = DB_SQL_TEMP["insert_sql_keys_str"]
@@ -178,10 +178,10 @@ class db_client:
         insert_sql = DB_SQL_TEMP["insert_sql"].format(table,sql_keys_str,perch)
         
         logger.debug(f"insert_sql - {insert_sql}")
-        logger.debug(f"<user_data> - {user_data}")
+        logger.debug(f"<_data> - {_data}")
         conn,cur = self.get_conn()
         try:
-            cur.execute(insert_sql,user_data)
+            cur.execute(insert_sql,_data)
             conn.commit()
         except Exception as e:
             conn.rollback()
@@ -191,19 +191,19 @@ class db_client:
             return {}
         else:
             logger.debug(f"records insert success.")
-            return user_data
+            return _data
         finally:
             cur.close()
             conn.close()
 
     def update_records(self,
-            cqp_data=None,
+            mybot_data=None,
             table="users",
             **kwargs
             )->bool:
         """
         更新数据
-        :params cqp_data: CQ端数据包
+        :params mybot_data: mybot_data内部消息体
         :params table:    指定数据表
         :params kwargs:   额外参数
             update_data   更新后的数据
@@ -234,8 +234,8 @@ class db_client:
             judge_data = tuple(kwargs.get("judge_data").values())
             update_data = update_data + judge_data
         else:
-            logger.warning(f"""<user_data> or <judge_data> unlawful.""")
-            logger.warning(f"""<user_data> - {kwargs.get("user_data")}""")
+            logger.warning(f"""<update_data> or <judge_data> unlawful.""")
+            logger.warning(f"""<update_data> - {kwargs.get("update_data")}""")
             logger.warning(f"""<judge_data> - {kwargs.get("judge_data")}""")
             return False
 
@@ -259,13 +259,13 @@ class db_client:
             conn.close()
 
     def delete_records(self,
-            cqp_data=None,
+            mybot_data=None,
             table="users",
             **kwargs
             )->bool:
         """
         删除数据
-        :params cqp_data: CQ端数据包
+        :params mybot_data: mybot_data内部消息体
         :params table: 指定数据表
         :params kwargs: 额外参数
             judge_data 判断条件,只提供=

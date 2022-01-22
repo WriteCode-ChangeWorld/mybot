@@ -182,7 +182,7 @@ class Config:
 			mybot_data["message"] = self.CQ_AT(int(mybot_data["sender"]["user_id"])) + \
 				"\n" + mybot_data["message"]
 		group_msg = {
-			"group_id": mybot_data["sender"]["group_id"],
+			"group_id": int(mybot_data["sender"]["group_id"]),
 			"message": mybot_data["message"]
 		}
 		logger.debug(f"<group_msg> - {group_msg}")
@@ -196,7 +196,7 @@ class Config:
 			mybot_data["message"] = self.CQ_AT(int(mybot_data["sender"]["user_id"])) + \
 				"\n" + mybot_data["message"]
 		user_msg = {
-			"user_id": mybot_data["sender"]["user_id"],
+			"user_id": int(mybot_data["sender"]["user_id"]),
 			"message": mybot_data["message"]
 		}
 		logger.debug(f"<user_msg> - {user_msg}")
