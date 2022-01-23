@@ -9,10 +9,8 @@
 
 # here put the import lib
 import os
-import sys
 import glob
 import importlib
-# sys.path.append("Arsenal")
 
 from Arsenal.basic.bot_tool import tool
 from Arsenal.basic.log_record import logger
@@ -22,7 +20,6 @@ class Dynamic_Load:
     """消息 - 插件解析器"""
     
     def __init__(self):
-        self.bot_name = type(self).__name__
         # 插件路径表达式
         self.pathname = "Arsenal/bot**.py"
         self.module_dicts = self.import_modules(self.pathname)
@@ -37,13 +34,13 @@ class Dynamic_Load:
                 recursive:bool=False,
                 class_start_with:str="Bot",
                 reimport:bool=False
-        ) -> dict: 
+        )->list: 
         """导入路径表达式下的模块
             1. 导入指定路径(pathname)下的模块,返回满足指定条件的类信息
             2. 被导入的插件类必须满足以下几个条件:
                 类是用户自定义的
                 类名以Bot开头
-                类必须包含有bot_name属性(type(self).__name__)
+                类必须包含有plugin_name属性(type(self).__name__)
                 类必须有一个解析函数parse
 
             :param pathname: 
@@ -60,13 +57,13 @@ class Dynamic_Load:
             :exp: 重新导入
             import_modules(pathname,reimport=True)
         """
-        module_dicts = {}
         module_paths = glob.glob(pathname,recursive=recursive)
         logger.debug("<Module> - Start")
         logger.debug(f"<Module Count> - 识别到{len(module_paths)}个符合规则的模块.")
         [logger.debug(f"<Module> - {path}") for path in module_paths]
         logger.debug("<Module> - End")
 
+        module_dicts = {}
         for path in module_paths:
             # Arsenal.bot_dynamic_demo1
             module_name = path.replace(os.sep, '.')[:-3]
@@ -84,7 +81,7 @@ class Dynamic_Load:
             for element in dir(module):
                 if not element.startswith('__') and \
                     element.startswith(class_start_with) and \
-                    hasattr(eval("module.{}".format(element)),"bot_name") and \
+                    hasattr(eval("module.{}".format(element)),"plugin_name") and \
                     hasattr(eval("module.{}".format(element)),"parse"):
 
                     info[element] = eval('module.{}'.format(element))
@@ -106,26 +103,27 @@ class Dynamic_Load:
                         info["plugin_type"] = 1
 
                     info["plugin_name"] = element
+                    info["plugin_nickname"] = eval("module.{}.plugin_nickname".format(element))
                     logger.success(f"<Plugin> Import Plugin Success - {element}")
                     module_dicts[element] = info
             # else:
             #     logger.debug(f"Module: <{eval('module')}> Cancel Import")
 
         logger.info(f"<Plugin> Import Plugin Count: {len(module_dicts)}")
-        module_dicts = sorted(module_dicts.items(), key=lambda module_dicts:module_dicts[1]["plugin_type"])
+        module_dicts = dict(sorted(module_dicts.items(), key=lambda module_dicts:module_dicts[1]["plugin_type"]))
         return module_dicts
  
     @logger.catch
-    def plugin_selector(self,eval_cqp_data):
+    def plugin_selector(self,mybot_data):
         """
         消息解析器
-        :params eval_cqp_data: 客户端消息体
+        :params mybot_data: mybot消息体
         :return : 
         """
         if not self.module_dicts:
             return self.error_code_list["NPF"]
 
-        logger.info(self.module_dicts)
+        # logger.info(self.module_dicts)
 
         result = None
         for module_name,module_addr in self.module_dicts.items():
@@ -134,36 +132,33 @@ class Dynamic_Load:
                     # 先判断用户或群组权限是否大于等于插件权限
                     pass
                 
-                    result = module_addr[module_name].parse(eval_cqp_data)
+                    result = module_addr[module_name].parse(mybot_data)
 
-                    # === 调试使用 ===
-                    # result = tool.PLUGIN_BLOCK
-                    # === 调试使用 ===
                 except Exception as e:
                     logger.warning(f"<Exception> - {e}")
-                    logger.warning(f"<eval_cqp_data> - {eval_cqp_data}. <module> - {module_addr[module_name]}")
+                    logger.warning(f"<mybot_data> - {mybot_data}. <module> - {module_addr[module_name]}")
+                    # 异常则默认跳过
                     result = tool.PLUGIN_IGNORE
             else:
                 logger.warning("module:{} not func:parse.Skip".format(module_name))
 
             # result = eval("{}.parse('{}')".format(module_dicts[module_name],msg))
-            if result:
-                logger.debug(f"<result> - {result}")
-                # 未命中解析规则或空值
-                if result == tool.PLUGIN_IGNORE or not result:
-                    logger.info(f"Miss Hit Module: {module_name}")
-                    continue
-                # 解析成功后跳出
-                elif result == tool.PLUGIN_BLOCK:
-                    logger.info(f"Hit Module: {module_name}")
-                    break
-                # 意料之外的值
-                else:
-                    logger.warning(f"<result> Unexpected Value - {result}")
-                    continue
-            logger.info("TEST TEST TEST")
+
+            logger.debug(f"<result> - {result}")
+            # 未命中解析规则或空值
+            if result == tool.PLUGIN_IGNORE:
+                logger.info(f"Miss Hit Module: {module_name}")
+                continue
+            # 解析成功后跳出
+            elif result == tool.PLUGIN_BLOCK:
+                logger.info(f"Hit Module: {module_name}")
+                break
+            # 意料之外的值
+            else:
+                logger.warning(f"<result> Unexpected Value - {result}")
+                continue
         else:
-            logger.info(f"<{eval_cqp_data}> Not Hit Modules")
+            logger.info(f"<mybot_data> - {mybot_data} | Not Hit Modules")
             return self.error_code_list["NHM"]
        
     # TEST for dynamic import

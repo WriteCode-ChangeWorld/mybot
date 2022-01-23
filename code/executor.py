@@ -3,21 +3,21 @@
 @File    :   executor.py
 @Time    :   2022/01/13 15:44:25
 @Author  :   Coder-Sakura
-@Version :   1.0
+@Version :   1.1
 @Desc    :   None
 '''
 
 # here put the import lib
-import sys
 import time
-# sys.path.append("Arsenal")
+import json
+from tokenize import group
 
 from dynamic_import import modules_dynamicLoad
 from Arsenal.basic.bot_tool import tool
-from Arsenal.basic.log_record import logger
-from Arsenal.basic.msg_temp import MYBOT_ERR_CODE, EXECUTOR_TASK_STATUS_INFO, TASK_PROCESSOR_TEMP
 from Arsenal.basic.thread_pool import ThreadPool, callback
 from Arsenal.basic.task_processor import taskprocessor
+from Arsenal.basic.log_record import logger
+from Arsenal.basic.msg_temp import MYBOT_ERR_CODE, EXECUTOR_TASK_STATUS_INFO, TASK_PROCESSOR_TEMP
 
 class Executor:
 	"""事件处理:插件轮询/热重启"""
@@ -25,20 +25,22 @@ class Executor:
 		# 为tool创建线程池pool
 		self.init_thread_pool(8)
 
-		# 启动定时任务检测线程
+		# 启动定时任务检测线程 - 实验性
 		# tool.pool.put(self.cycle_task_detect, (), callback)
 
-		# 消息 - 插件解析器
+		# 消息 - 插件解析器初始化
 		try:
-			self.modules_dynamicLoad = modules_dynamicLoad
-			self.module_dicts = self.modules_dynamicLoad.module_dicts
+			tool.modules_dynamicLoad = modules_dynamicLoad
 		except Exception as e:
 			logger.warning(MYBOT_ERR_CODE["Generic_Exception_Info"].format(e))
-			logger.warning("<dynamic_import>模块导入插件出现问题,请检查<dynamic_import>模块或插件后重试.")
-			exit()
+			logger.warning("<dynamic_import>模块导入插件出错,请检查<dynamic_import>模块/插件")
 		
+		# 数据库预处理
+		DBCheck()
+
+
 	# thread_pool func start
-	def init_thread_pool(self,max_num=8):
+	def init_thread_pool(self, max_num=8)->bool:
 		"""
 		初始化线程池,暂不考虑reload情况
 		< -- not reliable! -- >
@@ -46,7 +48,7 @@ class Executor:
 		try:
 			if hasattr(tool,"pool"):
 				tool.pool.terminal = True
-				logger.debug("3秒后重启线程池...")
+				logger.debug("reload thread pool in 3s.")
 				time.sleep(3)
 		except Exception as e:
 			logger.debug(MYBOT_ERR_CODE.format(e))
@@ -58,7 +60,7 @@ class Executor:
 			return True
 
 	@logger.catch
-	def cycle_task_detect(self,cycle=10):
+	def cycle_task_detect(self, cycle=10):
 		"""
 		定时(<cycle>秒)监测任务并将任务放入线程池执行
 		:params cycle: 监测周期,默认10秒检查一次
@@ -85,29 +87,89 @@ class Executor:
 
 	# thread_pool func end
 
-	def reload_modules(self,
-				pathname,
-				recursive,
-				class_start_with,
-				reimport=True):
+	def reload_modules(self, reimport=True)->dict:
 		"""
 		加载插件目录插件
 		:params reimport: True -> 重新导入
-		:params pathname,recursive,class_start_with: 暂未用到
+		:params pathname: todo
+		:params recursive: todo
+		:params class_start_with: todo
 		"""
-		return self.modules_dynamicLoad.import_modules(reimport=reimport)
+		return tool.modules_dynamicLoad.import_modules(reimport=reimport)
 
-	def parse(self,eval_cqp_data):
+	def exec(self):
 		"""
-		使用消息 - 插件解析器解析消息,以匹配出结果
+		插件解析器解析消息,以匹配出结果
 		"""
-		msg = eval_cqp_data.get("message", "")
+		msg = tool.mybot_data["user_info"].get("message", "")
 		if msg:
 			try:
-				self.modules_dynamicLoad.plugin_selector(eval_cqp_data)
+				tool.modules_dynamicLoad.plugin_selector(tool.mybot_data)
 			except Exception as e:
 				logger.warning(MYBOT_ERR_CODE["Generic_Exception_Info"].format(e))
 		else:
-			status = tool.auto_report_err(msg)
-			logger.info(f"<eval_cqp_data> not found <message> key - {eval_cqp_data}")
-			logger.info(f"<status> - {status}")
+			# status = tool.auto_report_err(msg)
+			logger.warning(f"<eval_cqp_data> not found <message> - {tool.mybot_data}")
+			
+class DBCheck:
+	"""数据库信息预处理"""
+	def __init__(self):
+		self.group_check()
+		self.plugin_check()
+
+	def group_check(self):
+		"""群组信息预处理"""
+		params = {}
+		group_info = tool.send_cq_client(params=params, api="cq_get_group_list")
+
+		if not group_info or not group_info["data"]:
+			logger.warning(f"<group_info err> - {group_info}")
+			return
+
+		for _ in group_info["data"]:
+			if not tool.db.select_records(table="group_chats", **{"gid": _["group_id"]}):
+				insert_data = {
+					"gid": int(_["group_id"]),
+					"group_level": int(tool.level["general_group_level"]),
+					"is_qqBlocked": 0
+				}
+
+				tool.db.insert_records(
+					table="group_chats",
+					**{"insert_data": insert_data}
+				)
+
+		result = tool.db.select_records(table="group_chats")
+		logger.info(f"群组: {len(result)}个")
+		logger.debug(f"group_chats - {result}")
+
+	def plugin_check(self):
+		"""插件信息预处理"""
+		copy_module_dicts = tool.modules_dynamicLoad.module_dicts
+
+		if not copy_module_dicts:
+			logger.warning(f"<copy_module_dicts> - {copy_module_dicts}")
+			return 
+
+		for module_name,module_addr in copy_module_dicts.items():
+			if not tool.db.select_records(table="plugin_info", **{"plugin_name": module_name}):
+				insert_data = {
+					"plugin_name": module_name,
+					"plugin_nickname": module_addr["plugin_nickname"],
+					"plugin_type": module_addr["plugin_type"],
+					"plugin_level": module_addr["plugin_level"],
+					# 默认运行中 - 0
+					"plugin_status": 0,
+					# 默认无限制规则 - {}
+					"plugin_limit_info": json.dumps({})
+				}
+
+				tool.db.insert_records(
+					table="plugin_info",
+					**{"insert_data": insert_data}
+				)
+
+		result = tool.db.select_records(table="plugin_info")
+		logger.info(f"数据库插件: {len(result)}个")
+		logger.info(f"本地插件: {len(copy_module_dicts)}个")
+		logger.debug(f"plugin_info - {result}")

@@ -388,9 +388,10 @@ class Blhx_Build_Pool:
         # self.plugin_level = 10
 
         # 服务器端自定义
-        self.bot_name = type(self).__name__
+        self.plugin_name = type(self).__name__
+        self.plugin_nickname = "碧蓝航线模拟建造插件"
         # D:\Code\mybot\code\res\Blhx_Build_Pool
-        self.workspace = pdr.get_plus_res(self.bot_name)
+        self.workspace = pdr.get_plus_res(self.plugin_name)
         # self.workspace = r"C:\Users\Administrator\Desktop\CQA-tuling\python插件\coolq-trace_anime-master\res\Blhx_Build_Pool"
 
         self.BSC = Build_Ships_Card(self.workspace)
@@ -632,7 +633,9 @@ class Blhx_Build_Pool:
                                     "\n当前收藏率:{}".format(bookmark_rate)
                 return data
 
-    def parse(self,msg):
-        return msg + self.bot_name
+    def parse(self,mybot_data):
+        if mybot_data == "test2":
+            print(f"{mybot_data + self.plugin_name}")
+            return 0
 
 Bot_Blhx_Build_Pool = Blhx_Build_Pool()

@@ -18,17 +18,23 @@ from Arsenal.basic.bot_tool import tool
 
 class so985:
     def __init__(self):
-        self.bot_name = type(self).__name__
+        self.plugin_name = type(self).__name__
+        self.plugin_nickname = "短链接插件"
         self.plugin_level = 8
-        print(f"{self.bot_name} - Warning!!!")
+        # print(f"{self.plugin_name} - Warning!!!")
         # http://api.985.so/api.php?format=json&url=http%3a%2f%2fwww.baidu.com&apikey=18816765357@94f53154fef918eb70d7b74f9a5dfc67
         # {"status":1,"url":"http://r6f.cn/Mjqh","err":""}
         self.suolink_api = "http://api.985.so/api.php"
         # self.host = "https://dlj.li/{}"
     
-    def parse(self,msg):
-        print("已进入短链接模块解析方法 --")
-        return tool.PLUGIN_BLOCK
+    def parse(self,mybot_data):
+        # TEST DynamicImport
+        if mybot_data == "test1":
+            return tool.PLUGIN_BLOCK
+            return ""
+            return None
+            return 1
+            return 0
     
     def get_slink(self,url):
         """
