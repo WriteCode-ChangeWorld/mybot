@@ -27,8 +27,8 @@ CREATE TABLE group_chats(
 CREATE TABLE messages(
   id INT AUTO_INCREMENT PRIMARY KEY,
   message_type VARCHAR(20) NOT NULL,
-  user_id INT(20) NOT NULL,
-  group_id INT(20) NOT NULL,
+  uid INT(20) NOT NULL,
+  gid INT(20) NOT NULL,
   content VARCHAR(1024) NOT NULL,
   md5 VARCHAR(40) NOT NULL,
 	message_datetime DATETIME NOT NULL
@@ -49,7 +49,7 @@ CREATE TABLE plugin_info(
 CREATE TABLE tasks(
   id INT AUTO_INCREMENT PRIMARY KEY,
   creator_id VARCHAR(20) NOT NULL,
-  group_id VARCHAR(20) NOT NULL,
+  gid VARCHAR(20) NOT NULL,
   task_type VARCHAR(30) NOT NULL,
   by_plugin VARCHAR(30) NOT NULL,
   create_time DATETIME NOT NULL,
