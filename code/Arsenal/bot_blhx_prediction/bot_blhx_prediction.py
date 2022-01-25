@@ -12,14 +12,14 @@ class Blhx_Secretary:
     """
     def __init__(self):
         """初始化工作"""
-        self.bot_name = type(self).__name__
+        self.plugin_name = type(self).__name__
         self.api_url = "https://api.bilibili.com/x/activity/prediction"
         self.headers = {
             "user-agent":"Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.141 Mobile Safari/537.36"
         }
         self.point_list = list(range(10,110,10))
         self.ttf_path = "../res/dy.ttf"
-        self.temporary_file_path = pdr.get_plus_res(self.bot_name)
+        self.temporary_file_path = pdr.get_plus_res(self.plugin_name)
         # self.temporary_file_path = os.path.join(os.getcwd(),"../res/blhx")
         isExists = os.path.exists(self.temporary_file_path)
         if not isExists:os.mkdir(self.temporary_file_path)

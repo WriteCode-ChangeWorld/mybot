@@ -45,9 +45,9 @@ class WhatAnime:
         2.静态图anime_search_api出错则转换
     """
     def __init__(self):
-        self.bot_name = type(self).__name__
+        self.plugin_name = type(self).__name__
         # 服务器端需要注意
-        self.workspace = pdr.get_plus_res(self.bot_name)
+        self.workspace = pdr.get_plus_res(self.plugin_name)
         # self.workspace = ""
         self.gif_res = os.path.join(self.workspace,"gif")
         if not os.path.exists(self.gif_res):os.mkdir(self.gif_res)

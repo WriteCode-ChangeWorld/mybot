@@ -52,8 +52,8 @@ def return_value(name1,name2):
 class Pokenman:
 	"""宝可梦杂交"""
 	def __init__(self):
-		self.bot_name = type(self).__name__
-		self.workspace = pdr.get_plus_res(self.bot_name)
+		self.plugin_name = type(self).__name__
+		self.workspace = pdr.get_plus_res(self.plugin_name)
 
 		self.blend_path = os.path.join(self.workspace,"blend")
 		self.raw_path = os.path.join(self.workspace,"raw")

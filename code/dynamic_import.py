@@ -12,16 +12,16 @@ import os
 import glob
 import importlib
 
-from Arsenal.basic.bot_tool import tool
 from Arsenal.basic.log_record import logger
-
+from Arsenal.basic.msg_temp import PLUGIN_BLOCK, PLUGIN_IGNORE
 
 class Dynamic_Load:
     """消息 - 插件解析器"""
     
     def __init__(self):
         # 插件路径表达式
-        self.pathname = "Arsenal/bot**.py"
+        # self.pathname = "Arsenal/bot**.py"
+        self.pathname = "Arsenal/bot**/bot**.py"
         self.module_dicts = self.import_modules(self.pathname)
 
         self.error_code_list = {
@@ -103,7 +103,11 @@ class Dynamic_Load:
                         info["plugin_type"] = 1
 
                     info["plugin_name"] = element
-                    info["plugin_nickname"] = eval("module.{}.plugin_nickname".format(element))
+                    try:
+                        info["plugin_nickname"] = eval("module.{}.plugin_nickname".format(element))
+                    except Exception as e:
+                        info["plugin_nickname"] = ""
+
                     logger.success(f"<Plugin> Import Plugin Success - {element}")
                     module_dicts[element] = info
             # else:
@@ -138,7 +142,7 @@ class Dynamic_Load:
                     logger.warning(f"<Exception> - {e}")
                     logger.warning(f"<mybot_data> - {mybot_data}. <module> - {module_addr[module_name]}")
                     # 异常则默认跳过
-                    result = tool.PLUGIN_IGNORE
+                    result = PLUGIN_IGNORE
             else:
                 logger.warning("module:{} not func:parse.Skip".format(module_name))
 
@@ -146,11 +150,11 @@ class Dynamic_Load:
 
             logger.debug(f"<result> - {result}")
             # 未命中解析规则或空值
-            if result == tool.PLUGIN_IGNORE:
+            if result == PLUGIN_IGNORE:
                 logger.info(f"Miss Hit Module: {module_name}")
                 continue
             # 解析成功后跳出
-            elif result == tool.PLUGIN_BLOCK:
+            elif result == PLUGIN_BLOCK:
                 logger.info(f"Hit Module: {module_name}")
                 break
             # 意料之外的值

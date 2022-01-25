@@ -18,8 +18,8 @@ class Random_Text:
     指向性时 --> 不转语音
     """
 	def __init__(self):
-		self.bot_name = type(self).__name__
-		self.workspace = pdr.get_plus_res(self.bot_name)
+		self.plugin_name = type(self).__name__
+		self.workspace = pdr.get_plus_res(self.plugin_name)
 		# self.workspace = ""
 
 		self.default_headers = {

@@ -12,8 +12,8 @@ class Phantom_Img:
     生成一张表图+指定里图=幻影坦克
     """
     def __init__(self):
-        self.bot_name = type(self).__name__
-        self.workspace = pdr.get_plus_res(self.bot_name)
+        self.plugin_name = type(self).__name__
+        self.workspace = pdr.get_plus_res(self.plugin_name)
         self.ttf_path = os.path.join(self.workspace,"..","dy.ttf")
         # 表图text
         self.text = "点我看涩图"

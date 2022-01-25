@@ -10,7 +10,7 @@
 # here put the import lib
 import requests
 
-from Arsenal.basic.bot_tool import tool
+from Arsenal.basic.msg_temp import PLUGIN_BLOCK
 
 # 网络请求函数修正后再统一导入使用
 # from BNConnect import baseRequest
@@ -30,7 +30,7 @@ class so985:
     def parse(self,mybot_data):
         # TEST DynamicImport
         if mybot_data == "test1":
-            return tool.PLUGIN_BLOCK
+            return PLUGIN_BLOCK
             return ""
             return None
             return 1

@@ -20,14 +20,14 @@ class Day_Illust:
 	# --不存在则创建文件(空,则写入后再发送)
 
 	def __init__(self):
-		self.bot_name = type(self).__name__
+		self.plugin_name = type(self).__name__
 		self.plugin_level = 8
 
 		self.flag = False
 		
 		# 本功能插件res目录 2.0
-		self.plus_res_path = pdr.get_plus_res(self.bot_name)
-		logger.debug("{} - {}".format(self.bot_name,self.plus_res_path))
+		self.plus_res_path = pdr.get_plus_res(self.plugin_name)
+		logger.debug("{} - {}".format(self.plugin_name,self.plus_res_path))
 		# self.plus_res_path = r"D:\Code\mybot\code\res\Day_Illust"
 
 		self.person_file_path = os.path.join(self.plus_res_path,"NewYearIllust.conf")

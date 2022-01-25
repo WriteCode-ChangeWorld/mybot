@@ -7,6 +7,7 @@ from Arsenal.basic.BNConnect import baseRequest
 class Ascii2d_Img:
 	"""Ascii2d搜图站点插件,返回色彩检索及特征检索的结果"""
 	def __init__(self):
+		self.plugin_name = type(self).__name__
 		self.host = "https://ascii2d.net"
 		self.color = "https://ascii2d.net/search/color/"
 		self.bovw = "https://ascii2d.net/search/bovw/"

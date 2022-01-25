@@ -1,0 +1,1 @@
+from . import bot_day_illust

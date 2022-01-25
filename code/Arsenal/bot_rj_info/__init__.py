@@ -1,0 +1,1 @@
+from . import bot_rj_info

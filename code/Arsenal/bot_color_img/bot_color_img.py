@@ -51,8 +51,8 @@ class Color_Img:
 
 	"""
 	def __init__(self):
-		# self.bot_name = type(self).__name__
-        # self.workspace = pdr.get_plus_res(self.bot_name)
+		# self.plugin_name = type(self).__name__
+        # self.workspace = pdr.get_plus_res(self.plugin_name)
 		# keyword[:2] keyword[-2:]
 		self.keyword = "来点涩图"
 		self.start_keyword = self.keyword[:2]
