@@ -162,7 +162,7 @@ class db_client:
             _data = kwargs["insert_data"]
              
         if isinstance(_data, dict):
-            _data = tuple(_data.values())
+            _data_tuple = tuple(_data.values())
         else:
             logger.warning(f"<_data> unlawful. -{_data}")
             return {}
@@ -181,7 +181,7 @@ class db_client:
         logger.debug(f"<_data> - {_data}")
         conn,cur = self.get_conn()
         try:
-            cur.execute(insert_sql,_data)
+            cur.execute(insert_sql,_data_tuple)
             conn.commit()
         except Exception as e:
             conn.rollback()

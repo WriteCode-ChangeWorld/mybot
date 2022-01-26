@@ -17,7 +17,7 @@ from PIL import Image,ImageDraw
 from collections import Counter
 
 from Arsenal.basic.plugin_res_directory import pdr
-from Arsenal.bot_day_illust import Day_Illust
+from Arsenal.bot_day_illust.bot_day_illust import Day_Illust
 
 class Lucky_Ships_Pool:
     """构建卡池及建造函数"""

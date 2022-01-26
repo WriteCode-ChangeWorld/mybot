@@ -1,4 +1,4 @@
-﻿from Arsenal.error import error
+﻿from Arsenal.coding.error import error
 import requests
 #import cqp
 import json

@@ -7,10 +7,10 @@ import configparser
 from Arsenal.basic.log_record import logger
 # 2.0
 from Arsenal.basic.plugin_res_directory import pdr
-from Arsenal.bot_gaussianblur_img import Bot_GasussianBlur_Img
+from Arsenal.bot_gaussianblur_img.bot_gaussianblur_img import Bot_GasussianBlur_Img
 # from color_img import get_img
-from Arsenal.bot_color_img import get_img
-from Arsenal.image import cat2pixiv
+from Arsenal.bot_color_img.bot_color_img import get_img
+from Arsenal.bot_saucenao_img.image import cat2pixiv
 
 class Day_Illust:
 	"""每日涩图"""
