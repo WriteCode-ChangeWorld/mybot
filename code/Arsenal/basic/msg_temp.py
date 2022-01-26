@@ -93,7 +93,7 @@ DB_INSERT_DEFAULT_TEMP = {
         "user_limit_count": 3,
         "user_call_count": 0,
         "magic_thing": 0,
-        "is_qqBlocked": 0,
+        "is_qqBlocked": 1,
         "create_date": "",
         "last_call_date": "",
         "cycle_expiration_time": ""

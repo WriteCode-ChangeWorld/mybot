@@ -41,7 +41,7 @@ class UserData:
 			# group_level = int(tool.db.select_records(table="group_chats", **{"gid":self.kwargs["gid"]})["group_level"])
 
 			if group_level >= tool.level["vip_group_level"]:
-				result:dict = tool.db.insert_records(self.mybot_data, **{"lev  el": tool.level["vip_user_level"]})
+				result:dict = tool.db.insert_records(self.mybot_data, **{"level": tool.level["vip_user_level"]})
 			else:
 				result:dict = tool.db.insert_records(self.mybot_data)
 		else:
