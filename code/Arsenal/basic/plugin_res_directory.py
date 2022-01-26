@@ -18,15 +18,12 @@ from Arsenal.basic.log_record import logger
 
 
 class PRDirectory:
-    """检测功能模块的res文件夹
-    
-    用于检测/创建类的res文件夹或指定文件夹
-    """
+    """检测/创建创建功能模块的res目录(工作目录)"""
     def __init__(self):
         """初始化工作"""
         # 类名称
-        self.bot_name = type(self).__name__
-        # print(self.bot_name)
+        self.plugin_name = type(self).__name__
+        # print(self.plugin_name)
 
         # 默认res资源文件根目录
         self.res_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),"..\\..\\resource")

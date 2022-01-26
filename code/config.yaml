@@ -35,6 +35,17 @@ Level :
     enable: True  # or False
     seconds: 10   # user_limit_cycle
 
+# 默认定时任务
+Task :
+  # 默认监测任务线程
+  CYCLE_TASK_DETECT: 
+    enable: False
+  # 随机发言插件 - 实验性
+  BOT_RANDOM_SPEECH:
+    enable: False
+  # 定时图片发送 - 实验性
+  CYCLE_IMAGE_SENDER:
+    enable: False
 
 
 # Plugin Config

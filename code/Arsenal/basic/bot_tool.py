@@ -70,11 +70,11 @@ class Config:
 		# 标志位 - 实验性
 		# PLUGIN_BLOCK
 		# 主动式插件消息命中解析规则返回
-		self.PLUGIN_BLOCK = 0
+		# self.PLUGIN_BLOCK = 0
 		# PLUGIN_IGNORE
 		# 主动式插件消息未命中解析规则
 		# 被动式插件跳过自身
-		self.PLUGIN_IGNORE = 1
+		# self.PLUGIN_IGNORE = 1
 		# ===== PLUGIN =====
 
 	def get_items(self,value_path="",obj="self.config"):

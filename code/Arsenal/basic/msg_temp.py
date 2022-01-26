@@ -30,6 +30,14 @@ CONFIG_CQ_CODE = {
 }
 
 # basic:bot_tool
+
+# 主动式插件消息未命中解析规则
+# 被动式插件跳过解析
+PLUGIN_IGNORE = 1
+
+# 主动式插件消息命中解析规则
+PLUGIN_BLOCK = 0
+
 TOOL_TEMP = {
     "load_config_success": "MybotConfigLoadSuccess - 配置加载成功",
     "load_config_error": "MybotConfigLoadError - 配置加载异常",

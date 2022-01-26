@@ -42,6 +42,7 @@ class Monitor:
 			return True
 
 		with UserData(**self.judge_data) as mybot_data:
+			tool.mybot_data = mybot_data
 			# 屏蔽 / 黑名单
 			if mybot_data["user_info"]["is_qqBlocked"] == 0:
 				if eval_cqp_data["message_type"] == "group":
