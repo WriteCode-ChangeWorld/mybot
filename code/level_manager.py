@@ -14,13 +14,14 @@ from Arsenal.basic.log_record import logger
 from Arsenal.basic.bot_tool import tool
 from Arsenal.basic.datetime_tool import datetime_now,datetime_offset
 from Arsenal.basic.user_data import UserData
-from Arsenal.basic.msg_temp import USER_MSG_TEMP,USER_LIMIT_TEMP
+from Arsenal.basic.msg_temp import USER_MSG_TEMP,USER_LIMIT_TEMP,DB_TEMP
 
 
 class Monitor:
 	"""用户/群组 的权限 查看/更新"""
 	def __init__(self):
 		self.judge_data = {}
+		self.db_update_judge_data = {}
 		self.wait_seconds = 1
 
 	def filter_msg(self, eval_cqp_data):
@@ -29,12 +30,13 @@ class Monitor:
 		:paramas eval_cqp_data: cq数据包
 		:return : 是 - True / 否 - False
 		"""
-		msg = eval_cqp_data.get("message", "")
+		message = eval_cqp_data.get("message", "")
 		uid = eval_cqp_data.get("user_id",0)
 		gid = eval_cqp_data.get("group_id",0)
 		message_type = eval_cqp_data.get("message_type", "")
 
-		self.judge_data = {"uid": uid, "gid": gid, "message_type": message_type}
+		self.judge_data = {"uid": uid, "gid": gid, "message_type": message_type, "message": message}
+		self.db_update_judge_data = {"uid": uid, "gid": gid}
 		for k in list(self.judge_data.keys()):
 			if not self.judge_data[k]:
 				del self.judge_data[k]
@@ -44,17 +46,23 @@ class Monitor:
 		with UserData(**self.judge_data) as mybot_data:
 			tool.mybot_data = mybot_data
 			# 屏蔽 / 黑名单
-			if mybot_data["user_info"]["is_qqBlocked"] == 0:
+			if mybot_data["user_info"]["is_qqBlocked"] == DB_TEMP["is_qqBlocked"]:
 				if eval_cqp_data["message_type"] == "group":
-					logger.info(USER_MSG_TEMP["qqBlocker_group_msg"].format(gid,uid,msg))
+					logger.info(USER_MSG_TEMP["qqBlocker_group_msg"].format(gid,uid,message))
 				elif eval_cqp_data["message_type"] == "private":
-					logger.info(USER_MSG_TEMP["qqBlocker_user_msg"].format(uid,msg))
+					logger.info(USER_MSG_TEMP["qqBlocker_user_msg"].format(uid,message))
 				return True
 
 			# 普通用户调用频率限制
 			if tool.user_limit_flag:
 				_ = self.user_limit(mybot_data)
 				if not _:
+					if eval_cqp_data["message_type"] == "group":
+						logger.info(USER_MSG_TEMP["general_group_msg"].format(gid,uid,message))
+					elif eval_cqp_data["message_type"] == "private":
+						logger.info(USER_MSG_TEMP["general_user_msg"].format(uid,message))
+					else:
+						logger.info(USER_MSG_TEMP["general_unknown_msg"].format(gid,uid,message))
 					return False
 				elif _:
 					# 向用户发送提示
@@ -63,11 +71,11 @@ class Monitor:
 
 			# 防止无返回值 默认不过滤False
 			if eval_cqp_data["message_type"] == "group":
-				logger.info(USER_MSG_TEMP["general_group_msg"].format(gid,uid,msg))
+				logger.info(USER_MSG_TEMP["general_group_msg"].format(gid,uid,message))
 			elif eval_cqp_data["message_type"] == "private":
-				logger.info(USER_MSG_TEMP["general_user_msg"].format(uid,msg))
+				logger.info(USER_MSG_TEMP["general_user_msg"].format(uid,message))
 			else:
-				logger.info(USER_MSG_TEMP["general_unknown_msg"].format(gid,uid,msg))
+				logger.info(USER_MSG_TEMP["general_unknown_msg"].format(gid,uid,message))
 			return False
 
 	def user_limit(self, mybot_data):
@@ -90,10 +98,13 @@ class Monitor:
 
 		# 更新cycle_expiration_time
 		if now_time > mybot_data["user_info"]["cycle_expiration_time"]:
-			offset_seconds = datetime_offset(now_time, tool.config["Level"]["user_limit"]["seconds"])
+			future_time = datetime_offset(now_time, tool.config["Level"]["user_limit"]["seconds"])
 			mybot_data["user_info"]["user_call_count"] = 0
-			mybot_data["user_info"]["cycle_expiration_time"] = now_time + offset_seconds
-			tool.db.update_records(mybot_data["user_info"], self.judge_data)
+			mybot_data["user_info"]["cycle_expiration_time"] = future_time
+			tool.db.update_records(**{
+				"update_data": mybot_data["user_info"], 
+				"judge_data": self.db_update_judge_data
+			})
 			return False
 
 	def _limit_prompt_info(self, mybot_data):

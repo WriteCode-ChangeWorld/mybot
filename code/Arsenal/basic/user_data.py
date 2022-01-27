@@ -22,7 +22,7 @@ class UserData:
 				"type": self.kwargs.get("message_type", 0),
 			},
 			"at": self.kwargs.get("at", True),
-			"message": "",
+			"message": self.kwargs.get("message", ""),
 			"plugin": {},
 		}
  

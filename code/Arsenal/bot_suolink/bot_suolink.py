@@ -29,12 +29,17 @@ class so985:
     
     def parse(self,mybot_data):
         # TEST DynamicImport
-        if mybot_data == "test1":
+        message = mybot_data['message']
+        if message == "test1":
             return PLUGIN_BLOCK
             return ""
             return None
             return 1
             return 0
+        # 2022年1月26日23:27:10
+        elif message == "#reload":
+            from Arsenal.basic.restart_mybot import restart
+            restart()
     
     def get_slink(self,url):
         """

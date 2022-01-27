@@ -9,6 +9,7 @@
 
 
 # ===== basic start =====
+# 消息收发
 USER_MSG_TEMP = {
     "qqBlocker_user_msg": "[私]收到来自屏蔽用户{}的信息: {}. 已丢弃",
     "qqBlocker_group_msg": "[群]收到群:{} 屏蔽用户{} 的信息: {}. 已丢弃",
@@ -66,7 +67,8 @@ TOOL_TEMP = {
 # basic:db_pool
 DB_TEMP = {
     "db_config_error": "请检查配置文件中Bot.{}的配置是否正确",
-    "db_disable": "无法连接数据库,请启动数据库"
+    "db_disable": "无法连接数据库,请启动数据库",
+    "is_qqBlocked": 0
 }
 
 # basic:db_pool

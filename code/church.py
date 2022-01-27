@@ -43,7 +43,6 @@ def event():
 	cqp_push_data = request.get_data()
 	eval_cqp_data = json.loads(cqp_push_data.decode('utf-8'))
 	church_control.hand(eval_cqp_data)
-	# 返回值?
 	return ""
 
 # =================  END  ================
