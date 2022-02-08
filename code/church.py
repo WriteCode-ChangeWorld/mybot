@@ -8,25 +8,37 @@
 '''
 
 # here put the import lib
+# import copy
 import json
 from flask import Flask, request, jsonify
 
 from executor import Executor
 from level_manager import Monitor
-from Arsenal.basic.bot_tool import tool
-from Arsenal.basic.msg_temp import CHURCH_IDENTIFY_MSG
+from Arsenal.basic.user_data import UserData
 from Arsenal.basic.log_record import logger
 
 
 class Church:
 	"""Mybot消息-生命周期事件处理"""
 
-	def __init__(self):
-		pass
-
 	def hand(self,eval_cqp_data):
-		if not monitor_control.filter_msg(eval_cqp_data):
-			executor_control.exec()
+		message = eval_cqp_data.get("message", "")
+		uid = eval_cqp_data.get("user_id",0)
+		gid = eval_cqp_data.get("group_id",0)
+		message_type = eval_cqp_data.get("message_type", "")
+
+		judge_data = {"uid": uid, "gid": gid, "message_type": message_type, "message": message}
+		for k in list(judge_data.keys()):
+			if not judge_data[k]:
+				del judge_data[k]
+		if not judge_data:
+			return 
+
+		with UserData(**judge_data) as mybot_data:
+			if not monitor_control.filter_msg(mybot_data):
+				# mybot_data = copy.deepcopy(tool.mybot_data)
+				executor_control.exec(mybot_data)
+
 
 
 # ================= START ================

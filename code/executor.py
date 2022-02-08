@@ -10,7 +10,6 @@
 # here put the import lib
 import time
 import json
-from tokenize import group
 
 from dynamic_import import modules_dynamicLoad
 from Arsenal.basic.bot_tool import tool
@@ -97,20 +96,20 @@ class Executor:
 		"""
 		return tool.modules_dynamicLoad.import_modules(reimport=reimport)
 
-	def exec(self):
+	def exec(self,mybot_data):
 		"""
 		插件解析器解析消息,以匹配出结果
 		"""
-		logger.debug(f"<mybot_data> - {tool.mybot_data}")
-		msg = tool.mybot_data.get("message", "")
+		logger.debug(f"<mybot_data> - {mybot_data}")
+		msg = mybot_data.get("message", "")
 		if msg:
 			try:
-				tool.modules_dynamicLoad.plugin_selector(tool.mybot_data)
+				tool.modules_dynamicLoad.plugin_selector(mybot_data)
 			except Exception as e:
 				logger.warning(MYBOT_ERR_CODE["Generic_Exception_Info"].format(e))
 		else:
 			# status = tool.auto_report_err(msg)
-			logger.warning(f"<eval_cqp_data> not found <message> - {tool.mybot_data}")
+			logger.warning(f"<mybot_data> not found <message> - {mybot_data}")
 			
 class DBCheck:
 	"""数据库信息预处理"""

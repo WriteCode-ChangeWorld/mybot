@@ -155,14 +155,15 @@ class Dynamic_Load:
                 continue
             # 解析成功后跳出
             elif result == PLUGIN_BLOCK:
-                logger.info(f"Hit Module: {module_name}")
+                logger.success(f"Hit Module: {module_name}")
                 break
             # 意料之外的值
             else:
+                logger.info(f"Warn Module: {module_name}")
                 logger.warning(f"<result> Unexpected Value - {result}")
                 continue
         else:
-            logger.info(f"<mybot_data> - {mybot_data} | Not Hit Modules")
+            logger.warning(f"Not Hit Any Modules | <mybot_data> - {mybot_data}")
             return self.error_code_list["NHM"]
        
     # TEST for dynamic import
