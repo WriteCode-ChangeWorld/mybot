@@ -30,14 +30,17 @@ CONFIG_CQ_CODE = {
     "reply_local_audio": "[CQ:record,file=file:///{}]"
 }
 
+
 # basic:bot_tool
 
 # 主动式插件消息未命中解析规则
 # 被动式插件跳过解析
 PLUGIN_IGNORE = 1
 
+
 # 主动式插件消息命中解析规则
 PLUGIN_BLOCK = 0
+
 
 TOOL_TEMP = {
     "load_config_success": "MybotConfigLoadSuccess - 配置加载成功",
@@ -64,12 +67,14 @@ TOOL_TEMP = {
     "cq_set_group_add_request": "{}/set_group_add_request"
 }
 
+
 # basic:db_pool
 DB_TEMP = {
     "db_config_error": "请检查配置文件中Bot.{}的配置是否正确",
     "db_disable": "无法连接数据库,请启动数据库",
     "is_qqBlocked": 0
 }
+
 
 # basic:db_pool
 DB_SQL_TEMP = {
@@ -84,6 +89,7 @@ DB_SQL_TEMP = {
     "update_sql": "UPDATE {} SET {} WHERE {}",
     "delete_sql": "DELETE FROM {} WHERE {}"
 }
+
 
 # basic:db_pool users表默认模板
 DB_INSERT_DEFAULT_TEMP = {
@@ -102,6 +108,7 @@ DB_INSERT_DEFAULT_TEMP = {
     }
 }
 
+
 # basic:task_processor 错误信息模板
 TASK_PROCESSOR_TEMP = {
     "TASK_START": "task start",
@@ -111,6 +118,7 @@ TASK_PROCESSOR_TEMP = {
     "NULL_VALUE": "<{}> is null value",
     "NOT_DATETIME_DATA": "<{}> is not DATETIME data"
 }
+
 
 # basic:file_handler
 # FILEIO_ERROR_INFO = {
@@ -136,6 +144,7 @@ SEARCH_IMG_MSG = {
     "reply_bot_quit": "[CQ:at,qq={}]\n检测到发送非图片信息\n搜图模式自动关闭",
 }
 
+
 # module:bot_wahtanime
 WHATANIME_MSG = {
     "enbale": "开启搜番"
@@ -150,6 +159,7 @@ MYBOT_ERR_CODE = {
     "Generic_Exception_Info": "Exception : {}"
 }
 
+
 # main:church.identify_data模板
 CHURCH_IDENTIFY_MSG = [
     {"code": -100, "description": "识别到心跳包或其他未知原因"},
@@ -160,16 +170,19 @@ CHURCH_IDENTIFY_MSG = [
     {"code": 200, "description": "识别通过,用户状态正常"}
 ]
 
+
 # main:priority 优先级
 EXECUTOR_FUNCTION_LIST = [
     {"priority": 500, "function": "SauceNao", "module": ""},
     {"priority": 500, "function": "Ascii2d", "module": ""}
 ]
 
+
 # main:executor 
 EXECUTOR_TASK_STATUS_INFO = {
     "info": "task_status:<{}> nums:<{}>"
 }
+
 
 # main:level_manager
 USER_LIMIT_TEMP = {

@@ -20,15 +20,12 @@ from Arsenal.basic.log_record import logger
 class PRDirectory:
     """检测/创建创建功能模块的res目录(工作目录)"""
     def __init__(self):
-        """初始化工作"""
-        # 类名称
-        self.plugin_name = type(self).__name__
-        # print(self.plugin_name)
-
-        # 默认res资源文件根目录
-        self.res_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),"..\\..\\resource")
-        if not os.path.exists(self.res_path):
-            os.mkdir(self.res_path)
+        # resource 静态资源文件目录
+        self.resource = os.path.join(os.path.dirname(os.path.abspath(__file__)),"..\\..\\resource")
+        # 插件工作目录
+        self.workspace = os.path.join(os.path.dirname(os.path.abspath(__file__)),"..\\..\\workspace")
+        if not os.path.exists(self.workspace):
+            os.mkdir(self.workspace)
         
     def exists_path(self,path):
         """判断path是否存在"""
@@ -50,7 +47,7 @@ class PRDirectory:
         :params plus_name: 功能插件名称
         :return: plus_res_path/None
         """
-        plus_res_path = os.path.join(self.res_path,plus_name)
+        plus_res_path = os.path.join(self.workspace,plus_name)
         if not self.exists_path(plus_res_path):
             # 创建失败
             if not self.create_path(plus_res_path):
