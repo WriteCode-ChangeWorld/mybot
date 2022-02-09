@@ -2,6 +2,9 @@
 # log
 /code/log/*
 
+# resource
+/code/resource/*
+
 ##### Mybot project .gitignore End #####
 
 
