@@ -34,7 +34,7 @@ class Monitor:
 
 		uid = mybot_data["sender"]["user_id"]
 		gid = mybot_data["sender"]["group_id"]
-		message = mybot_data["message"]
+		message = mybot_data["arrange"]["message"]
 		self.db_update_judge_data = {"uid": uid, "gid": gid}
 
 		# with UserData(**self.judge_data) as mybot_data:

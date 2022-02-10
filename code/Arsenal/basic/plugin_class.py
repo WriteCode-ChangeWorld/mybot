@@ -63,7 +63,7 @@ class PluginClass:
         """
         # ===== 主动式插件demo =====
         
-        message = mybot_data.get("message")
+        message = mybot_data["arrange"].get("message")
         # your expression
         if "hello world" in message:
             # send message to go-cq or anything
@@ -83,7 +83,7 @@ class PluginClass:
         # ===== 主动式插件demo =====
         # ===== 被动式插件demo =====
 
-        message = mybot_data.get("message")
+        message = mybot_data["arrange"].get("message")
         # your expression
         if "hello world" in message:
             # do something

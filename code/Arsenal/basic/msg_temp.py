@@ -156,7 +156,8 @@ WHATANIME_MSG = {
 # main:error_code 错误码
 MYBOT_ERR_CODE = {
     "Arsenal_Not_Found": "Arsenal目录不存在,请重新检查并创建",
-    "Generic_Exception_Info": "Exception : {}"
+    "Generic_Exception_Info": "Exception : {}",
+    "Generic_Value_Info": "{} - {}",
 }
 
 

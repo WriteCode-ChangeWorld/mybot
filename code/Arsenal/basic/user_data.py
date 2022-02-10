@@ -30,7 +30,7 @@ class UserData:
 	def __enter__(self):
 		# 非新用户
 		_kwargs = {"uid": self.kwargs.get("uid", 0), "gid": self.kwargs.get("gid", 0)}
-		select_result:dict = tool.db.select_records(**_kwargs)
+		select_result:list = tool.db.select_records(**_kwargs)
 		# 新用户
 		if not select_result:
 			# 判断是否在里群(level>=50)

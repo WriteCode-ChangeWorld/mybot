@@ -4,8 +4,7 @@
 @Time    :   2021/03/18 14:28:41
 @Author  :   Coder-Sakura
 @Version :   1.0
-@Contact :   1508015265@qq.com
-@Desc    :   None
+@Desc    :   提供目录相关功能
 '''
 
 # here put the import lib
@@ -34,7 +33,8 @@ class PRDirectory:
     def create_path(self,path):
         """根据path创建文件夹"""
         try:
-            os.mkdir(path)
+            if not self.exists_path(path):
+                os.mkdir(path)
         except Exception as e:
             logger.warning(f"<Exception> - {e}")
             logger.warning(f"<Error Path> - {path}")
@@ -48,10 +48,9 @@ class PRDirectory:
         :return: plus_res_path/None
         """
         plus_res_path = os.path.join(self.workspace,plus_name)
-        if not self.exists_path(plus_res_path):
-            # 创建失败
-            if not self.create_path(plus_res_path):
-                return None
+        # 创建失败
+        if not self.create_path(plus_res_path):
+            return None
         return plus_res_path
 
 
