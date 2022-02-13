@@ -80,5 +80,5 @@ class Blhx_Magic_Data:
             new_data.append(d)
 
         # 舰娘名称写入用户数据
-        self.w_blhx_data(new_data)
+        # self.w_blhx_data(new_data)
         return new_data

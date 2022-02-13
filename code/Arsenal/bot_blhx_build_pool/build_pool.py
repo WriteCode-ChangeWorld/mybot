@@ -21,11 +21,6 @@ class Lucky_Ships_Pool:
         self.blhx_tool = blhx_tool 
         # 池子名称与索引文件
         self.ship_key_data = self.read_json(self.blhx_tool.key_filepath)
-        # TODO self.ship_key_data = self.read_json(os.path.join(self.resource,self.ship_key_filename))
-
-        # TODO 池子数据与池子名称文件
-        # self.ship_data_filename = "pool_data.json"
-        # self.ship_data = self.read_json(os.path.join(self.resource,self.ship_data_filename))
 
     def get_random_num(self):
         """获取随机数"""
@@ -33,15 +28,9 @@ class Lucky_Ships_Pool:
 
     def read_json(self,path):
         return loadFile.by_json(path)
-        # with open(path,encoding="utf8") as f:
-        #     return json.load(f)
 
-    def reload_json_data(self,path,new_data):
+    def reload_json_data(self,path):
         return dumpFile.by_json(path)
-        # with open(path, 'w')as f:
-        #     json.dump(new_data,f)
-
-        return self.read_json(path)
 
     def get_rare_value(self,pool_rare_set,rare_random):
         """
@@ -66,7 +55,10 @@ class Lucky_Ships_Pool:
             # 防止无返回值,返回最低稀有度
             return list(pool_rare_set.keys())[-1]
 
-    def get_lucky_ships(self,pool_name:str,count:int=10,multiple:int=1)->list:
+    def get_lucky_ships(self, pool_name:str,
+                              count:int=10,
+                              multiple:int=1,
+                              cheating_list:list=[])->list:
         """碧蓝航线模拟十连建造
         :params pool_name: 池子名称,如:轻型池/重型池/特型池
         :params count: 建造次数,最高10个
@@ -74,6 +66,11 @@ class Lucky_Ships_Pool:
             消耗<multiple>个魔方提高舰娘判定概率<multiple>倍
         :return: 舰娘信息list ['科隆','榊','狐提','太原','小天鹅','科尔克','布什','狻','倔强','牙买加']
         """
+        # [作弊]请使用本地数据内包含的舰娘名称,否则后果自负
+        if cheating_list:
+            logger.debug(f"<cheating!!!> - {cheating_list}")
+            return cheating_list
+
         # 负数或次数大于10则返回
         if count > 10 or count <= 0:
             logger.warning(self.blhx_tool.err_temp["general_err"].format("count", count))
@@ -81,31 +78,17 @@ class Lucky_Ships_Pool:
 
         # 读取对应池子索引数据
         self.ship_key_data = self.read_json(self.blhx_tool.key_filepath)
-        
+        # 读取对应池子数据
         pool_data_path = os.path.join(self.resource,self.ship_key_data.get(pool_name,""))
-        # 检查pool_name
-        if pool_name not in list(self.ship_key_data.keys()) and \
-            os.path.exists(pool_data_path):
-            logger.warning(self.blhx_tool.err_temp["pool_name_err"].format(pool_name,
-                list(self.ship_key_data.keys())))
-            return []
-        else:
-            # 读取对应池子数据
-            pool_data = self.read_json(pool_data_path)
-
-        # multiple倍率
-        # multiple超出范围 (-∞,0)(10,+∞)
-        if multiple > 10 or multiple <= 0:
-            logger.warning(self.blhx_tool.err_temp["general_err"].format("multiple", multiple))
-            return []
+        pool_data = self.read_json(pool_data_path)
 
         # 池子数据中各个节点
         if pool_data.get("ships_list","") == "" or \
             pool_data.get("rare_set","") == "":
             logger.warning(self.blhx_tool.err_temp["general_err"].format("pool_data", pool_data))
-            # return "pool_data_items_error"
             return ["pool_data_items_error"]
 
+        # 舰娘建造结果
         lucky_result = []
         log_result = []
         # 对应建造次数
@@ -120,14 +103,12 @@ class Lucky_Ships_Pool:
             rare_value = self.get_rare_value(pool_rare_set,rare_random)
             log_info["rare_random"] = rare_random
             log_info["rare_value"] = rare_value
-            # logger.info("抽取稀有度的概率",rare_random,rare_value)
 
             # 确认是否抽中up舰娘
             up_ship_rare = self.get_random_num()
-            up_ship_list = pool_extra_data.get(rare_value,"")
             log_info["up_ship_rare"] = up_ship_rare
-            # logger.info("抽取舰娘的概率",up_ship_rare)
 
+            up_ship_list = pool_extra_data.get(rare_value,"")
             # 有up舰娘
             if up_ship_list:
                 # 取up概率去重并转为list
@@ -137,7 +118,6 @@ class Lucky_Ships_Pool:
                 # 从低到高排序
                 up_values.sort()
                 log_info["up_values"] = up_values
-                # logger.info("up概率:",up_values)
 
                 # 判断up_ship_rare是否有命中up
                 up_ship_lucky_number = 0
@@ -149,10 +129,12 @@ class Lucky_Ships_Pool:
                 # 有命中up舰娘
                 if up_ship_lucky_number != 0:
                     same_lucky_number_ship = [k for k,v in up_ship_list.items() if v == up_ship_lucky_number]
-                    lucky_ship = random.choice(same_lucky_number_ship)
-                    # logger.info(same_lucky_number_ship)
-                    # logger.info(up_ship_lucky_number)
-                    # logger.info(lucky_ship)
+                    if not same_lucky_number_ship:
+                        # TODO
+                        lucky_ship = random.choice(pool_ships_list[rare_value])
+                    else:
+                        lucky_ship = random.choice(same_lucky_number_ship)
+                    log_info["lucky_ship"] = lucky_ship
                     lucky_result.append(lucky_ship)
                 # 没有命中up舰娘
                 else:
@@ -164,15 +146,16 @@ class Lucky_Ships_Pool:
 
                     # 随机选取一个对应稀有度的非up舰娘
                     lucky_ship = random.choice(pool_ships_list_now)
+                    log_info["lucky_ship"] = lucky_ship
                     lucky_result.append(lucky_ship)
             # 无up舰娘
             else:
                 lucky_ship = random.choice(pool_ships_list[rare_value])
+                log_info["lucky_ship"] = lucky_ship
                 lucky_result.append(lucky_ship)
 
             log_result.append(log_info)
-            logger.info(log_info)
-            # logger.info(lucky_ship,"\n")
+            logger.debug(f"第{i}发建造结果: {log_info}")
 
         # logger.info("log_result\n",log_result)
         # lucky_result = ['花园', '卡莉永', '树城', '喷水鱼', '雾城', '雾城', '花园', '花园', '卡莉永', '树城']

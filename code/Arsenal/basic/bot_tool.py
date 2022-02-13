@@ -156,8 +156,10 @@ class Config:
 			params = self.private_msg_temp(mybot_data)
 			self.send_cq_client(params, api="cq_http_send_private_url")
 		else:
+			logger.debug(f"<mybot_data> - {mybot_data}")
 			return False
 
+		logger.debug(f"<mybot_data> - {mybot_data}")
 		return True
 
 	def send_cq_client(self,params,api=None,url=None):

@@ -12,7 +12,9 @@ import os
 import glob
 import importlib
 
+from Arsenal.basic.bot_tool import tool
 from Arsenal.basic.log_record import logger
+from Arsenal.basic.datetime_tool import datetime_now
 from Arsenal.basic.msg_temp import PLUGIN_BLOCK, PLUGIN_IGNORE
 
 class Dynamic_Load:
@@ -155,6 +157,14 @@ class Dynamic_Load:
                 continue
             # 解析成功后跳出
             elif result == PLUGIN_BLOCK:
+                # TODO 调用机器人成功,更新last_call_date/user_call_count
+                mybot_data["user_info"]["last_call_date"] = datetime_now().strftime('%Y-%m-%d %H:%M:%S')
+                # TODO 搜图第一句之类的提示语会消耗次数,待后续调整
+                mybot_data["user_info"]["user_call_count"] += 1
+                tool.db.update_records(**{
+                    "update_data": mybot_data["user_info"], 
+                    "judge_data": {"uid": mybot_data["user_info"]["uid"], "gid": mybot_data["user_info"]["gid"]}
+                })
                 logger.success(f"Hit Module: {module_name}")
                 break
             # 意料之外的值

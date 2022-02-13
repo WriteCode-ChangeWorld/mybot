@@ -96,7 +96,7 @@ class Executor:
 		"""
 		return tool.modules_dynamicLoad.import_modules(reimport=reimport)
 
-	def exec(self,mybot_data):
+	def exec(self, mybot_data):
 		"""
 		插件解析器解析消息,以匹配出结果
 		"""
