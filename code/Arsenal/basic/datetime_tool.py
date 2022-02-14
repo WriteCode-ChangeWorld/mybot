@@ -31,3 +31,6 @@ def seconds2time(seconds:int)->list:
     h,m = divmod(m,60)
     d,h = divmod(h,24)
     return [d, h, m, s]
+
+def str2datetime(now_time:str)->datetime.datetime:
+    return datetime.datetime.strptime(now_time, "%Y-%m-%d %H:%M:%S")

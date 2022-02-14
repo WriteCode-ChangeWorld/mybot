@@ -101,7 +101,7 @@ class Executor:
 		插件解析器解析消息,以匹配出结果
 		"""
 		logger.debug(f"<mybot_data> - {mybot_data}")
-		msg = mybot_data.get("message", "")
+		msg = mybot_data["arrange"].get("message", "")
 		if msg:
 			try:
 				tool.modules_dynamicLoad.plugin_selector(mybot_data)

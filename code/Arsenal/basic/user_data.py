@@ -21,7 +21,7 @@ class UserData:
 				"group_id": int(self.judge_data.get("gid", 0)),
 				"type": self.judge_data.get("message_type", 0),
 			},
-			"at": self.kwargs.get("at", True),
+			"at": True,
 			# 回复消息
 			"message": "",
 			"plugin": {},
@@ -29,17 +29,17 @@ class UserData:
  
 	def __enter__(self):
 		# 非新用户
-		_kwargs = {"uid": self.kwargs.get("uid", 0), "gid": self.kwargs.get("gid", 0)}
+		_kwargs = {"uid": self.judge_data.get("uid", 0), "gid": self.judge_data.get("gid", 0)}
 		select_result:list = tool.db.select_records(**_kwargs)
 		# 新用户
 		if not select_result:
 			# 判断是否在里群(level>=50)
-			group_result = tool.db.select_records(table="group_chats", **{"gid":self.kwargs.get("gid", 0)})
+			group_result = tool.db.select_records(table="group_chats", **{"gid":self.judge_data.get("gid", 0)})
 			if group_result:
 				group_level = int(group_result.get("group_level", tool.level["general_group_level"]))
 			else:
 				group_level = tool.level["general_group_level"]
-			# group_level = int(tool.db.select_records(table="group_chats", **{"gid":self.kwargs["gid"]})["group_level"])
+			# group_level = int(tool.db.select_records(table="group_chats", **{"gid":self.judge_data["gid"]})["group_level"])
 
 			if group_level >= tool.level["vip_group_level"]:
 				result:dict = tool.db.insert_records(self.mybot_data, **{"level": tool.level["vip_user_level"]})

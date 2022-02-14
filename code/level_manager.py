@@ -12,7 +12,7 @@ import random
 
 from Arsenal.basic.log_record import logger
 from Arsenal.basic.bot_tool import tool
-from Arsenal.basic.datetime_tool import datetime_now,datetime_offset
+from Arsenal.basic.datetime_tool import datetime_now, datetime_offset, str2datetime
 from Arsenal.basic.msg_temp import USER_MSG_TEMP,USER_LIMIT_TEMP,DB_TEMP
 
 
@@ -91,8 +91,15 @@ class Monitor:
 			self.wait_seconds = (mybot_data["user_info"]["cycle_expiration_time"] - now_time).seconds
 			return True
 
+
+		# 第一次插入数据时,cycle_expiration_time为str类型
+		# 后续为datetime.datetime,需要进行转换
+		cycle_expiration_time = mybot_data["user_info"]["cycle_expiration_time"]
+		if type(cycle_expiration_time) != type(now_time):
+			cycle_expiration_time = str2datetime(cycle_expiration_time)
+
 		# 更新cycle_expiration_time
-		if now_time > mybot_data["user_info"]["cycle_expiration_time"]:
+		if now_time > cycle_expiration_time:
 			future_time = datetime_offset(now_time, tool.config["Level"]["user_limit"]["seconds"])
 			mybot_data["user_info"]["user_call_count"] = 0
 			mybot_data["user_info"]["cycle_expiration_time"] = future_time
