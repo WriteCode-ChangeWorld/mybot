@@ -21,7 +21,7 @@ class BLHX_Tool:
 
         ##### 主类Blhx_Build_Pool #####
         # 合成所需船坞头像目录
-        self.root_dir = os.path.join(self.resource, "shipyardicon")
+        self.root_dir = os.path.join(self.resource_path, "shipyardicon")
 
         # 所有舰娘数据 暂时只有主类使用
         self.ships_all_data_filename = os.path.join(self.resource,"ships_all_data.json")
