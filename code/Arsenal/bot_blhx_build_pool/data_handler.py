@@ -27,10 +27,10 @@ class Blhx_Magic_Data:
         if extra_id:
             user_id = str(extra_id)
         else:
-            user_id = self.blhx_tool.mybot_data["sender"]["user_id"]
+            user_id = str(self.blhx_tool.mybot_data["sender"]["user_id"])
 
         # 查询用户舰娘数据
-        self.user_data_path = os.path.join(self.blhx_tool.user_ship_data_dir,user_id)
+        self.user_data_path = os.path.join(self.blhx_tool.user_ship_data_dir, user_id)
         with open(self.user_data_path,"a+",encoding="utf8") as f:
             f.seek(0)
             read_ship_list = f.readlines()

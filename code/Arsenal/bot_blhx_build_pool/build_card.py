@@ -73,7 +73,7 @@ class Build_Ships_Card:
             if ship_data[i]["isNew"]:
                 img_build_bg.paste(new, new_coordinate_list[i], mask=new.split()[-1])
 
-        build_card_path = os.path.join(self.build_card_result_path,"{}.png".format(int(time.time())))
+        build_card_path = os.path.join(self.blhx_tool.build_card_result_path,"{}.png".format(int(time.time())))
         img_build_bg.save(build_card_path,qulity=100)
         return build_card_path
 

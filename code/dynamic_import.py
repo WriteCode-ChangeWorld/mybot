@@ -131,33 +131,33 @@ class Dynamic_Load:
 
         # logger.info(self.module_dicts)
 
-        result = None
+        count = 1
         for module_name,module_addr in self.module_dicts.items():
+            logger.debug(f"[{count}/{len(self.module_dicts)}][{module_name}] =======")
+            result = None
             if hasattr(module_addr[module_name],"parse"):
                 try:
-                    # 先判断用户或群组权限是否大于等于插件权限
+                    # 判断群组权限是否大于等于插件权限
+                    # 判断用户权限是否大于等于插件权限
                     pass
-                
+                    
                     result = module_addr[module_name].parse(mybot_data)
-
                 except Exception as e:
-                    logger.warning(f"<Exception> - {e}")
-                    logger.warning(f"<mybot_data> - {mybot_data}. <module> - {module_addr[module_name]}")
+                    logger.debug(f"<Exception> - {e}")
                     # 异常则默认跳过
                     result = PLUGIN_IGNORE
             else:
                 logger.warning("module:{} not func:parse.Skip".format(module_name))
 
-            # result = eval("{}.parse('{}')".format(module_dicts[module_name],msg))
-
-            logger.debug(f"<result> - {result}")
             # 未命中解析规则或空值
             if result == PLUGIN_IGNORE:
-                logger.info(f"Miss Hit Module: {module_name}")
+                logger.debug(f"Miss Hit Module: {module_name} | <result> - PLUGIN_IGNORE")
+                count += 1
                 continue
             # 解析成功后跳出
             elif result == PLUGIN_BLOCK:
                 # TODO 调用机器人成功,更新last_call_date/user_call_count
+                # 调用成功才更新last_call_date
                 mybot_data["user_info"]["last_call_date"] = datetime_now().strftime('%Y-%m-%d %H:%M:%S')
                 # TODO 搜图第一句之类的提示语会消耗次数,待后续调整
                 mybot_data["user_info"]["user_call_count"] += 1
@@ -165,12 +165,13 @@ class Dynamic_Load:
                     "update_data": mybot_data["user_info"], 
                     "judge_data": {"uid": mybot_data["user_info"]["uid"], "gid": mybot_data["user_info"]["gid"]}
                 })
-                logger.success(f"Hit Module: {module_name}")
+                logger.success(f"Hit Module: {module_name} | <result> - PLUGIN_BLOCK")
+                count += 1
                 break
             # 意料之外的值
             else:
-                logger.info(f"Warn Module: {module_name}")
-                logger.warning(f"<result> Unexpected Value - {result}")
+                logger.debug(f"Warning Module: {module_name} | <result> - {result}")
+                count += 1
                 continue
         else:
             logger.warning(f"Not Hit Any Modules | <mybot_data> - {mybot_data}")

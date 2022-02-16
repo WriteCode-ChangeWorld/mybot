@@ -56,12 +56,14 @@ class Blhx_Build_Pool(PluginClass):
     def help_info(self):
         # 可用池
         poolList_Text = "\n● ".join(list(self.LSP.ship_key_data.keys()))
+        # 支持倍率提升的池子
+        support_multiple_pools_text = "\n● ".join(self.blhx_tool.support_multiple_pools)
         # 收藏率
         ships_user_data = self.BMD.r_blhx_data(extra_id=self.mybot_data["sender"]["user_id"])
         bookmark_rate = str(round(len(ships_user_data)/len(self.blhx_tool.ships_all_data)*100,3)) + "%"
 
         message = self.blhx_tool.text_temp["help"].format(
-            poolList_Text, bookmark_rate, str(self.mybot_data["user_info"]["magic_thing"]),
+            poolList_Text, support_multiple_pools_text, bookmark_rate, str(self.mybot_data["user_info"]["magic_thing"]),
             self.blhx_tool.activity_pool_info()["name"]
         )
         return message
@@ -92,10 +94,11 @@ class Blhx_Build_Pool(PluginClass):
         if not data:
             return {}
         else:
+            logger.debug(f"{data}")
             starLevelText = data["starLevelText"]
             if starLevelText in ["最高方案","海上传奇","决战方案"]:
                 starLevelText = "超稀有"
-            shipPath = os.path.join(self.blhx_tool.root_dir,starLevelText,data["shipName"])
+            shipPath = os.path.join(self.blhx_tool.root_dir, starLevelText, data["shipName"])
             data["shipPath"] = shipPath
             return data
 
@@ -160,7 +163,7 @@ class Blhx_Build_Pool(PluginClass):
             return PLUGIN_BLOCK
 
         # 建造池索引文件不存在
-        pool_data_path = os.path.join(self.resource, self.LSP.ship_key_data[extra_params["pool"]])
+        pool_data_path = os.path.join(self.blhx_tool.resource_path, self.LSP.ship_key_data[extra_params["pool"]])
         if not os.path.exists(pool_data_path):
             self.mybot_data["message"] = self.blhx_tool.err_temp["pool_exists_err_msg"].format(extra_params["pool"])
             tool.auto_send_msg(self.mybot_data)
@@ -177,8 +180,9 @@ class Blhx_Build_Pool(PluginClass):
             return PLUGIN_BLOCK
 
         # 检查skin
-        if not extra_params.get("skin","") and \
+        if not extra_params.get("skin","") or \
             extra_params.get("skin","") not in self.blhx_tool.support_skin_value:
+            logger.warning(self.blhx_tool.err_temp["skin_err_msg"])
             extra_params["skin"] = self.blhx_tool.default_skin
 
         # multiple
@@ -194,13 +198,14 @@ class Blhx_Build_Pool(PluginClass):
             return PLUGIN_BLOCK
         
         if extra_params["m"] > 10 or extra_params["m"] <= 0:
+            logger.warning(self.blhx_tool.err_temp["multiple_err_msg"])
             extra_params["m"] = self.blhx_tool.default_multiple
         
         if extra_params["m"] != self.blhx_tool.default_multiple:
             # 池子不支持提升multiple
             if extra_params["pool"] not in self.blhx_tool.support_multiple_pools:
                 support_multiple_text = ",".join(self.blhx_tool.support_multiple_pools)
-                self.mybot_data["message"] = "选择的<{}>池子不支持提升up舰娘出货倍率!\n仅{}支持".\
+                self.mybot_data["message"] = "当前指定的建造池: <{}>不支持使用-m参数来提升up舰娘出货倍率!\n仅{}支持".\
                     format(extra_params["pool"],support_multiple_text)
                 tool.auto_send_msg(self.mybot_data)
                 return PLUGIN_BLOCK
@@ -249,6 +254,7 @@ class Blhx_Build_Pool(PluginClass):
                 return PLUGIN_BLOCK
 
             # 检查参数
+            logger.debug(MYBOT_ERR_CODE["Generic_Value_Info"].format("extra_params",extra_params))
             if not self.check_param(extra_params):
                 # 结束消息周期
                 return PLUGIN_BLOCK
@@ -281,7 +287,7 @@ class Blhx_Build_Pool(PluginClass):
                 bookmark_rate = str(round(len(ships_user_data)/len(self.blhx_tool.ships_all_data)*100,3)) + "%"
                 self.mybot_data["message"] = self.blhx_tool.text_temp["success"].format(
                     extra_params["pool"], build_card_path,
-                    magic_now, bookmark_rate
+                    int(magic_cost), magic_now, bookmark_rate
                 )
                 tool.auto_send_msg(self.mybot_data)
                 return PLUGIN_BLOCK

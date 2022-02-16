@@ -79,7 +79,7 @@ class Lucky_Ships_Pool:
         # 读取对应池子索引数据
         self.ship_key_data = self.read_json(self.blhx_tool.key_filepath)
         # 读取对应池子数据
-        pool_data_path = os.path.join(self.resource,self.ship_key_data.get(pool_name,""))
+        pool_data_path = os.path.join(self.blhx_tool.resource_path,self.ship_key_data.get(pool_name,""))
         pool_data = self.read_json(pool_data_path)
 
         # 池子数据中各个节点
@@ -155,10 +155,7 @@ class Lucky_Ships_Pool:
                 lucky_result.append(lucky_ship)
 
             log_result.append(log_info)
-            logger.debug(f"第{i}发建造结果: {log_info}")
+            logger.debug(f"第{i+1}发建造结果: {log_info}")
 
-        # logger.info("log_result\n",log_result)
-        # lucky_result = ['花园', '卡莉永', '树城', '喷水鱼', '雾城', '雾城', '花园', '花园', '卡莉永', '树城']
-        # lucky_result = ['俄克拉荷马', '彭萨科拉', '安克雷奇', '奥古斯特·冯·帕塞瓦尔', '埃吉尔', '萨福克', '马可·波罗', '鹫', '俄克拉荷马', '内华达']
-        logger.info(lucky_result)
+        logger.info(f"<lucky_result> - {lucky_result}")
         return lucky_result
