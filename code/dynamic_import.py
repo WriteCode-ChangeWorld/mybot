@@ -119,7 +119,6 @@ class Dynamic_Load:
         module_dicts = dict(sorted(module_dicts.items(), key=lambda module_dicts:module_dicts[1]["plugin_type"]))
         return module_dicts
  
-    @logger.catch
     def plugin_selector(self,mybot_data):
         """
         消息解析器

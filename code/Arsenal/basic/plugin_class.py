@@ -13,6 +13,7 @@ pass
 
 # 导入自定义模块
 from Arsenal.basic.plugin_res_directory import pdr
+from Arsenal.basic.log_record import logger
 from Arsenal.basic.msg_temp import PLUGIN_BLOCK, PLUGIN_IGNORE
 
 # 插件主类命名以模块文件(如:bot_ascii2d_img.py)
@@ -51,6 +52,7 @@ class PluginClass:
                """|  插件介绍  |\n"""\
                """|============|"""
         
+    @logger.catch
     def parse(self,mybot_data:dict) -> dict:
         """
         每个功能插件的主类必须存在一个parse函数

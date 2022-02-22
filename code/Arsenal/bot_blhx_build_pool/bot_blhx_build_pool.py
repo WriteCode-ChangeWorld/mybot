@@ -41,7 +41,7 @@ class Blhx_Build_Pool(PluginClass):
         
         # 静态资源文件目录
         self.resource_path = os.path.join(pdr.resource, "Blhx_Build_Pool")
-        # TODO self.resource = r"C:\Users\Administrator\Desktop\CQA-tuling\python插件\coolq-trace_anime-master\res\Blhx_Build_Pool"
+        # self.resource_path 无则不填
         
         # 插件工作目录
         self.workspace = pdr.get_plus_res(self.plugin_name)
@@ -211,6 +211,7 @@ class Blhx_Build_Pool(PluginClass):
                 return PLUGIN_BLOCK
         return PLUGIN_IGNORE
 
+    @logger.catch
     def parse(self, mybot_data):
         self.mybot_data = mybot_data
         self.blhx_tool.mybot_data = mybot_data
@@ -291,6 +292,9 @@ class Blhx_Build_Pool(PluginClass):
                 )
                 tool.auto_send_msg(self.mybot_data)
                 return PLUGIN_BLOCK
+
+        # 默认跳过
+        return PLUGIN_IGNORE
 
 
 Bot_Blhx_Build_Pool = Blhx_Build_Pool()
