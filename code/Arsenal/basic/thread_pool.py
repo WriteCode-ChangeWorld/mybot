@@ -90,6 +90,8 @@ class ThreadPool:
         """
         # 每个线程都执行call方法
         t = threading.Thread(target=self.call)
+        # 用于定时任务跟随主线程结束
+        t.setDaemon(True)
         t.start()
 
     def call(self):
