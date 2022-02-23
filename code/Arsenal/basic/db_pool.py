@@ -106,8 +106,7 @@ class db_client:
             return []
         else:
             res = cur.fetchall()
-            logger.debug(f"found {len(res)} recods")
-            logger.debug(f"res - {res}")
+            logger.debug(f"{len(res)} recods - {res}")
         finally:
             cur.close()
             conn.close()

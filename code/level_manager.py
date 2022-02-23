@@ -80,17 +80,10 @@ class Monitor:
 		:return: 是 - True or 否 - False
 		"""
 		now_time = datetime_now()
-		logger.debug(f"<mybot_data> - {mybot_data}")
 
 		# 高级用户
 		if int(mybot_data["user_info"]["user_level"]) > int(tool.level["general_user_level"]):
 			return False
-
-		# 调用超出限制
-		if int(mybot_data["user_info"]["user_call_count"]) >= int(mybot_data["user_info"]["user_limit_count"]):
-			self.wait_seconds = (mybot_data["user_info"]["cycle_expiration_time"] - now_time).seconds
-			return True
-
 
 		# 第一次插入数据时,cycle_expiration_time为str类型
 		# 后续为datetime.datetime,需要进行转换
@@ -108,6 +101,11 @@ class Monitor:
 				"judge_data": self.db_update_judge_data
 			})
 			return False
+
+		# 调用超出限制
+		if int(mybot_data["user_info"]["user_call_count"]) >= int(mybot_data["user_info"]["user_limit_count"]):
+			self.wait_seconds = (mybot_data["user_info"]["cycle_expiration_time"] - now_time).seconds
+			return True
 
 	def _limit_prompt_info(self, mybot_data):
 		"""发送提示,请稍后再试"""

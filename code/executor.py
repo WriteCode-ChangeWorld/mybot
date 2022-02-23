@@ -29,10 +29,11 @@ class Executor:
 
 		# 消息 - 插件解析器初始化
 		try:
+			modules_dynamicLoad.module_dicts = modules_dynamicLoad.import_modules(modules_dynamicLoad.pathname)
 			tool.modules_dynamicLoad = modules_dynamicLoad
 		except Exception as e:
 			logger.warning(MYBOT_ERR_CODE["Generic_Exception_Info"].format(e))
-			logger.warning("<dynamic_import>模块导入插件出错,请检查<dynamic_import>模块/插件")
+			logger.warning("<dynamic_import>模块导入插件出错,请检查<dynamic_import>模块或对应插件")
 		
 		# 数据库预处理
 		DBCheck()
@@ -47,15 +48,19 @@ class Executor:
 		try:
 			if hasattr(tool,"pool"):
 				tool.pool.terminal = True
-				logger.debug("reload thread pool in 3s.")
-				time.sleep(3)
+				logger.info("Reload Thread Pool In Short Time.")
+				time.sleep(0.1)
+				# time.sleep(3)
+			logger.info("Init Thread Pool In Short Time.")
 		except Exception as e:
 			logger.debug(MYBOT_ERR_CODE.format(e))
+			logger.warning("Init Thread Pool Fail.")
 			return False
 		finally:
 			# 重置中断标志
 			tool.pool = ThreadPool(max_num=max_num)
 			tool.pool.terminal = False
+			logger.info("Init Thread Pool Success.")
 			return True
 
 	@logger.catch
@@ -124,28 +129,28 @@ class DBCheck:
 
 		if not group_info or not group_info["data"]:
 			logger.warning(f"<group_info err> - {group_info}")
-			return
+		else:
+			for _ in group_info["data"]:
+				if not tool.db.select_records(table="group_chats", **{"gid": _["group_id"]}):
+					insert_data = {
+						"gid": int(_["group_id"]),
+						"group_level": int(tool.level["general_group_level"]),
+						"is_qqBlocked": 0
+					}
 
-		for _ in group_info["data"]:
-			if not tool.db.select_records(table="group_chats", **{"gid": _["group_id"]}):
-				insert_data = {
-					"gid": int(_["group_id"]),
-					"group_level": int(tool.level["general_group_level"]),
-					"is_qqBlocked": 0
-				}
-
-				tool.db.insert_records(
-					table="group_chats",
-					**{"insert_data": insert_data}
-				)
+					tool.db.insert_records(
+						table="group_chats",
+						**{"insert_data": insert_data}
+					)
 
 		result = tool.db.select_records(table="group_chats")
-		logger.info(f"群组: {len(result)}个")
+		logger.info(f"数据库群组: {len(result)}个")
 		logger.debug(f"group_chats - {result}")
 
 	def plugin_check(self):
 		"""插件信息预处理"""
 		copy_module_dicts = tool.modules_dynamicLoad.module_dicts
+		logger.debug(f"<copy_module_dicts> - {copy_module_dicts}")
 
 		if not copy_module_dicts:
 			logger.warning(f"<copy_module_dicts> - {copy_module_dicts}")
@@ -170,6 +175,7 @@ class DBCheck:
 				)
 
 		result = tool.db.select_records(table="plugin_info")
+		logger.debug(f"plugin_info - {result}")
+
 		logger.info(f"数据库插件: {len(result)}个")
 		logger.info(f"本地插件: {len(copy_module_dicts)}个")
-		logger.debug(f"plugin_info - {result}")

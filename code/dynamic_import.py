@@ -24,7 +24,7 @@ class Dynamic_Load:
         # 插件路径表达式
         # self.pathname = "Arsenal/bot**.py"
         self.pathname = "Arsenal/bot**/bot**.py"
-        self.module_dicts = self.import_modules(self.pathname)
+        # self.module_dicts = self.import_modules(self.pathname)
 
         self.error_code_list = {
             "NPF": "Not Plugin Found",
@@ -162,7 +162,7 @@ class Dynamic_Load:
                 mybot_data["user_info"]["user_call_count"] += 1
                 tool.db.update_records(**{
                     "update_data": mybot_data["user_info"], 
-                    "judge_data": {"uid": mybot_data["user_info"]["uid"], "gid": mybot_data["user_info"]["gid"]}
+                    "judge_data": {"uid": mybot_data["sender"]["user_id"], "gid": mybot_data["sender"]["group_id"]}
                 })
                 logger.success(f"Hit Module: {module_name} | <result> - PLUGIN_BLOCK")
                 count += 1
@@ -178,6 +178,7 @@ class Dynamic_Load:
        
     # TEST for dynamic import
     def main(self):
+        self.module_dicts = self.import_modules(self.pathname)
         while True:
             command = input("\nInput the Command or q to Quit: ")
             if command == "q":
