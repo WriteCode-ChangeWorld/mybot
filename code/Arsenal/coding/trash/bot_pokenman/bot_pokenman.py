@@ -53,7 +53,8 @@ class Pokenman:
 	"""宝可梦杂交"""
 	def __init__(self):
 		self.plugin_name = type(self).__name__
-		self.workspace = pdr.get_plus_res(self.plugin_name)
+		# self.workspace = pdr.get_plus_res(self.plugin_name)
+		self.workspace = os.path.join(pdr.resource, "Pokenman")
 
 		self.blend_path = os.path.join(self.workspace,"blend")
 		self.raw_path = os.path.join(self.workspace,"raw")

@@ -52,6 +52,9 @@ Task :
 Plugin :
   saucenao :
     api_key : "f8c6827c4a9e6eef82267d5a0f1da48d067a87d1"
+  bot_img_search :
+    # 搜图插件 - 最大消息等待时间,秒
+    timeout : 60
 
 
 # Debug Config

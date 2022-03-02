@@ -63,8 +63,8 @@ class Blhx_Build_Pool(PluginClass):
         bookmark_rate = str(round(len(ships_user_data)/len(self.blhx_tool.ships_all_data)*100,3)) + "%"
 
         message = self.blhx_tool.text_temp["help"].format(
-            poolList_Text, support_multiple_pools_text, bookmark_rate, str(self.mybot_data["user_info"]["magic_thing"]),
-            self.blhx_tool.activity_pool_info()["name"]
+            self.plugin_nickname, poolList_Text, support_multiple_pools_text, bookmark_rate, 
+            str(self.mybot_data["user_info"]["magic_thing"]), self.blhx_tool.activity_pool_info()["name"]
         )
         return message
 
@@ -148,6 +148,9 @@ class Blhx_Build_Pool(PluginClass):
 
     def check_param(self, extra_params):
         """额外参数值校验
+            pool - 指定建造池
+            skin - 改造/皮肤/誓约等非原始立绘的控制
+            multiple - 活动池抽卡倍率提升
         return True or False
         """
         ## 客户端 ##

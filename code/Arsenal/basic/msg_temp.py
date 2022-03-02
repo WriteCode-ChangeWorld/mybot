@@ -131,7 +131,12 @@ TASK_PROCESSOR_TEMP = {
 
 
 # ===== module start =====
-# module:bot_saucenao_img
+# module:bot_img_search
+IMG_SEARCH_TEMP_GENG = {
+
+}
+
+
 SEARCH_IMG_MSG = {
     "search_image_enable": "开启搜图",
     "search_image_quit": "关闭搜图",
@@ -143,12 +148,11 @@ SEARCH_IMG_MSG = {
     "reply_enable_search": "[CQ:at,qq={}]\n未启用搜图模式!请勿重复关闭!\n(加入黑名单)",
     "reply_bot_quit": "[CQ:at,qq={}]\n检测到发送非图片信息\n搜图模式自动关闭",
 }
-
-
-# module:bot_wahtanime
 WHATANIME_MSG = {
     "enbale": "开启搜番"
 }
+
+
 # ===== module end =====
 
 

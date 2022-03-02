@@ -179,3 +179,4 @@ class DBCheck:
 
 		logger.info(f"数据库插件: {len(result)}个")
 		logger.info(f"本地插件: {len(copy_module_dicts)}个")
+		

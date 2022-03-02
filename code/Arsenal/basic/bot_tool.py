@@ -65,7 +65,7 @@ class Config:
 
 		# ===== PLUGIN =====
 		# saucenao
-		self.saucenao_api_key = self.get_items('["Plugin"]["saucenao"]["api_key"]')
+		# self.saucenao_api_key = self.get_items('["Plugin"]["saucenao"]["api_key"]')
 
 		# 标志位 - 实验性
 		# PLUGIN_BLOCK
@@ -95,7 +95,8 @@ class Config:
 
 	def reload_bot_config(self):
 		"""重新加载配置文件"""
-		return init_config()
+		self.config = init_config()
+		return self.config
 
 	def read_level_info(self):
 		"""加载配置文件中的权限设置"""
