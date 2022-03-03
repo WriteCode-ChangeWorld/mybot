@@ -17,6 +17,25 @@ from yaml.loader import Loader, SafeLoader
 from Arsenal.basic.log_record import logger
 
 
+def download_file(resp = None,
+                 filepath = None,
+                 mode = "ab"):
+	"""
+	文件写入
+	"""
+	if not resp or not filepath:
+		logger.warning("download_file: PARAMS ERROR!!")
+		return 
+
+	try:
+		with open(filepath, mode) as f:
+			f.write(resp.content)
+	except Exception as e:
+		logger.warning(f"Exception - {e}")
+		return 
+	return filepath
+
+
 class LoadFile:
 	# read yaml file  
     @logger.catch
