@@ -51,7 +51,12 @@ Task :
 # Plugin Config
 Plugin :
   saucenao :
-    api_key : "f8c6827c4a9e6eef82267d5a0f1da48d067a87d1"
+    api_key : ""
+    # saucenao触发ascii2d二次搜索的最低相似度
+    limit_similarity : 60.0
+    # saucenao返回同人本时是否获取同人本信息
+    add_doujin_info: True
+
   bot_img_search :
     # 搜图插件 - 最大消息等待时间,秒
     timeout : 60

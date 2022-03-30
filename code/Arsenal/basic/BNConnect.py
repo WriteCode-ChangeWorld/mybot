@@ -16,13 +16,18 @@ requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 from Arsenal.basic.log_record import logger
 
-
-
-headers = {
+# pixiv
+pixiv_headers = {
 	"Host": "www.pixiv.net",
 	"referer": "https://www.pixiv.net/",
 	"origin": "https://accounts.pixiv.net",
 	"accept-language": "zh-CN,zh;q=0.9",	# 返回translation,中文翻译
+	"User-Agent": 'Mozilla/5.0 (Windows NT 10.0; WOW64) '
+		'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36',
+}
+
+
+general_headers = {
 	"User-Agent": 'Mozilla/5.0 (Windows NT 10.0; WOW64) '
 		'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36',
 }
@@ -36,17 +41,16 @@ def baseRequest(options,
 		):
 	'''
 	:params options 请求参数
-		{"method":"get/post","url":"example.com"}
+		{"headers":"your headers","url":"example.com"}
 	:params method
 		"GET"/"POST"
 	:params data
 	:params params
 	:params retry_num 重试次数
-	:return response对象/False
+	:return response or False
 
-	如果options中有定义了headers参数,则使用定义的;否则使用默认的headers
+	options支持自定义headers,否则使用默认的headers
 
-	下面这行列表推导式作用在于:
 	添加referer时,referer需要是上一个页面的url,比如:画师/作品页面的url时,则可以自定义请求头
 	demo如下:
 	demo_headers = headers.copy()
@@ -58,12 +62,15 @@ def baseRequest(options,
 	baseRequest(options = options)
 	这样baseRequest中使用的headers则是定制化的headers,而非默认headers
 	'''
-	base_headers = [options["headers"] if "headers" in options.keys() else headers][0]
-
-	if "pixiv" in options["url"] and not options["headers"]:
-		base_headers = headers
+	if "headers" in options.keys():
+		base_headers = options["headers"]
+	elif "pixiv" in options["url"] and "headers" not in options.keys():
+		base_headers = pixiv_headers
+	elif "headers" not in options.keys():
+		base_headers = general_headers
 
 	logger.debug(f"<options> - {options}")
+	logger.debug(f"<base_headers> - {base_headers}")
 	try:
 		response = requests.request(
 				method,
@@ -80,7 +87,7 @@ def baseRequest(options,
 	except Exception as e:
 		logger.info(f"<err> - network requests err | <Exception> - {e}")
 		if retry_num > 0:
-			time.sleep(0.1)
+			time.sleep(0.2)
 			return baseRequest(options,data,params,retry_num=retry_num-1)
 		else:
 			logger.info(f"<options> - {options}")

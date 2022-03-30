@@ -133,7 +133,7 @@ TASK_PROCESSOR_TEMP = {
 # ===== module start =====
 # module:bot_img_search
 IMG_SEARCH_TEMP_GENG = {
-
+    "saucenao_param_err": "Param Value Err - {}"
 }
 
 
