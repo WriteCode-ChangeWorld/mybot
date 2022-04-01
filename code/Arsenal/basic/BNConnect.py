@@ -10,6 +10,7 @@
 # here put the import lib
 import time
 import requests
+import cloudscraper
 # 强制取消警告
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
@@ -34,18 +35,18 @@ general_headers = {
 
 
 def baseRequest(options,
-		method="GET",
-		data=None,
-		params=None,
-		retry_num=5
+		method = "GET",
+		data = None,
+		params = None,
+		retry_num = 5
 		):
 	'''
-	:params options 请求参数
+	:params options: 请求参数
 		{"headers":"your headers","url":"example.com"}
-	:params method
+	:params method:
 		"GET"/"POST"
-	:params data
-	:params params
+	:params data: POST data
+	:params params: GET params
 	:params retry_num 重试次数
 	:return response or False
 
@@ -85,11 +86,67 @@ def baseRequest(options,
 		response.encoding = "utf8"
 		return response
 	except Exception as e:
-		logger.info(f"<err> - network requests err | <Exception> - {e}")
+		logger.warning(f"<err> - network requests err | <Exception> - {e}")
 		if retry_num > 0:
 			time.sleep(0.2)
-			return baseRequest(options,data,params,retry_num=retry_num-1)
+			return baseRequest(options, method, data, params, retry_num=retry_num-1)
 		else:
 			logger.info(f"<options> - {options}")
-			logger.info(f"<err> - network requests err | no retry times")
+			logger.warning(f"<err> - network requests err | no retry times")
+			return 
+
+def scraperRequest(options,
+		method = "GET",
+		scraper = None,
+		data = None,
+		params = None,
+		retry_num = 5
+		):
+	'''
+	:params options: 请求参数
+		{"headers":"your headers","url":"example.com"}
+	:params method:
+		"GET"/"POST"
+	:params scraper: cloudscraper.CloudScraper
+	:params data: POST data
+	:params params: GET params
+	:params retry_num 重试次数
+	:return response or False
+
+	options支持自定义headers,否则使用默认的headers
+	'''
+	if "headers" in options.keys():
+		base_headers = options["headers"]
+	elif "pixiv" in options["url"] and "headers" not in options.keys():
+		base_headers = pixiv_headers
+	elif "headers" not in options.keys():
+		base_headers = general_headers
+
+	logger.debug(f"<options> - {options}")
+	logger.debug(f"<base_headers> - {base_headers}")
+
+	if not scraper:
+		scraper = cloudscraper.create_scraper()
+
+	try:
+		response = scraper.request(
+				method,
+				options["url"],
+				data = data,
+				params = params,
+				cookies = options.get("cookies",""),
+				headers = base_headers,
+				# verify = False,
+				timeout = options.get("timeout",10),
+			)
+		response.encoding = "utf8"
+		return response
+	except Exception as e:
+		logger.warning(f"<err> - network requests err | <Exception> - {e}")
+		if retry_num > 0:
+			time.sleep(0.2)
+			return scraperRequest(options, method, scraper, data, params, retry_num=retry_num-1)
+		else:
+			logger.info(f"<options> - {options}")
+			logger.warning(f"<err> - network requests err | no retry times")
 			return 
