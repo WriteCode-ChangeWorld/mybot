@@ -112,19 +112,20 @@ class SauceNao:
 			logger.debug(f"SauceNao.params - {params}")
 			resp = baseRequest(method="POST", options=options, data=m, params=params)
 		else:
-			logger.warning(IMG_SEARCH_TEMP_GENG["saucenao_param_err"].format(
+			logger.warning(IMG_SEARCH_TEMP_GENG["param_err"].format(
 				f"<url>:{url} - <file>:{file}"
 			))
 			return self._err_code(999)
 
+
 		if not resp:
-			logger.warning(IMG_SEARCH_TEMP_GENG["saucenao_param_err"].format(
+			logger.warning(IMG_SEARCH_TEMP_GENG["param_err"].format(
 				f"<url>:{url} - <file>:{file}"
 			))
 			return self._err_code(999)
 		elif resp.status_code != 200:
 			logger.error(f"{self._err_code(resp.status_code)}")
-			logger.error(f"{resp.text}")
+			logger.error(f"{resp.text[:300]}")
 			return self._err_code(resp.status_code)
 		else:
 			saucenao_resp = SauceNaoResp(resp.json())
@@ -142,7 +143,7 @@ class SauceNao:
 		if saucenao_resp.long_limit <= 0:
 			return self._err_code(998)
 
-		# db:all 第一个结果为非pixiv网站时,给予pixiv额外权重
+		# db:all - 第一个结果为非pixiv网站时,给予pixiv额外权重
 		if self.params["db"] == DB_id["all"] and \
 			saucenao_resp.results[0].index_id != DB_id["pixiv"]:
 			for _ in saucenao_resp.results:
@@ -153,24 +154,31 @@ class SauceNao:
 				if _.index_id == DB_id["doujin"]:
 					_.similarity = float(_.similarity * 0.97)
 
+		# db:doujin/mangadex - 搜本模式给予漫画类结果额外权重
+		if self.params["db"] in [DB_id["doujin"], DB_id["mangadex"]]:
+			for _ in saucenao_resp.results:
+				if _.index_id in [DB_id["doujin"], DB_id["mangadex"]]:
+					_.similarity = float(_.similarity * 1.03)
+
 		# 尝试丢弃盗图者或已删除的记录 - 实验性功能
 		first_result = saucenao_resp.results[0]
 		if first_result.index_id == DB_id["pixiv"]:
 			_pixivList = [_ for _ in saucenao_resp.results\
 				if _.index_id == DB_id["pixiv"] and _.similarity >= first_result.similarity-5.0]
-			# TODO 待校验该逻辑是否合理
 			if len(_pixivList) == 1:
 				saucenao_resp.results = [first_result]
-				return saucenao_resp
+				# return saucenao_resp
 			else:
 				second_result = saucenao_resp.results[0]
 				# 画师不同, 前者pid大于后者 - 选择后者
 				if first_result.member_name != second_result.member_name and \
 					first_result.pixiv_id > second_result.pixiv_id:
 					saucenao_resp.results = [second_result]
-					return saucenao_resp
+					# return saucenao_resp
 
 			# second_result.index_id == DB_id["pixiv"] and \
 			# saucenao_resp.results
-
+		
+		# 相似度排序
+		saucenao_resp.results.sort(key=lambda i:i.similarity, reverse=True)
 		return saucenao_resp
