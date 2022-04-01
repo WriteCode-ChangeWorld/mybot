@@ -17,8 +17,8 @@ from Arsenal.basic.datetime_tool import datetime_now, datetime_offset
 from Arsenal.basic.msg_temp import MYBOT_ERR_CODE, TASK_PROCESSOR_TEMP,\
     PLUGIN_BLOCK, PLUGIN_IGNORE
 
-# from Arsenal.bot_img_search.sites import saucenao, ascii2d, yandex
-from Arsenal.bot_img_search.sites import SauceNao, Ascii2d, Yandex
+from Arsenal.bot_img_search.sites import SauceNao, Ascii2d, Doujin
+# from Arsenal.bot_img_search.sites import SauceNao, Ascii2d, Yandex
 from Arsenal.bot_img_search.img_search_tool import Img_Search_Tool,\
     saucenao_info, ascii2d_info, yandex_info
 
@@ -34,7 +34,7 @@ class Img_Search(PluginClass):
         self.plugin_nickname = "二次元图片搜索"
         self.plugin_type = 1
         self.plugin_level = 10
-        self.resource_path = ""        
+        self.resource_path = ""
         # 插件工作目录
         self.workspace = pdr.get_plus_res(self.plugin_name)
 
@@ -45,10 +45,9 @@ class Img_Search(PluginClass):
         self.engines = {
             "SauceNao": SauceNao,
             "Ascii2d": Ascii2d,
-            "Yandex": Yandex,
-            # TODO
-            # "Doujin": Doujin, # 同人本 - SauceNao
-            # "Iqdb": Iqdb
+            "Doujin": Doujin, # 同人本
+            # "Yandex": Yandex, # TODO
+            # "Iqdb": Iqdb # TODO
         }
         self.default_engineName = "SauceNao"
         self.default_engine = self.engines[self.default_engineName]
@@ -86,7 +85,6 @@ class Img_Search(PluginClass):
             logger.debug(f"search_queue <{len(self.img_search_tool.search_queue)}> {self.img_search_tool.search_queue}")
             logger.debug(f"cycle_check_SearchQueue check success - sleep:{self.img_search_tool.limit_seconds}")
             time.sleep(self.img_search_tool.limit_seconds)
-
 
     @logger.catch
     def parse(self, mybot_data: dict) -> dict:
