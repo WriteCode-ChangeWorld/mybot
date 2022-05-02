@@ -23,18 +23,18 @@ class SauceNaoItem:
         # 缩略图
         self.thumbnail = ""
         # 图片标题 / 漫画标题
-        self.title = "无"
+        self.title = "unknown"
         # 图片链接 / 本子链接
-        self.url = "无"
+        self.url = ""
         # 作者名称
-        self.member_name = "无"
+        self.member_name = "unknown"
 
         # 插画pid 可能存在
         self.pixiv_id = 0
         # 作者uid 可能存在
         self.member_id = 0
         # 同人本名称 可能存在
-        self.doujinName = "无"
+        self.doujinName = "unknown"
         # 番剧 可能存在 - 用于在anilist中查询番剧信息
         self.anilist_id = int()
 
@@ -63,7 +63,7 @@ class SauceNaoItem:
     def _get_title(item):
         data:dict = item["data"]
         title = data.get('title',"") or data.get('material',"") or \
-                data.get('source',"") or data.get('created_at',"") or "无"
+                data.get('source',"") or data.get('created_at',"") or "unknown"
         return title
 
     @staticmethod
@@ -73,10 +73,10 @@ class SauceNaoItem:
             author = data.get('author',"") or data.get('author_name',"") or \
                         data.get('member_name',"") or data.get('pawoo_user_username',"") or \
                         data.get('company',"") or data.get('creator',[""])[0] or \
-                        data.get('creator',"") or "无"
+                        data.get('creator',"") or "unknown"
         except Exception as e:
             logger.warning(f"Exception - {e} - {item}")
-            author = "无"
+            author = "unknown"
         return author
 
     @staticmethod
@@ -87,13 +87,13 @@ class SauceNaoItem:
         elif "getchu_id" in data:
             url = f"http://www.getchu.com/soft.phtml?id={data['getchu_id']}"
         else:
-            url = "无"
+            url = ""
         return url
 
     @staticmethod
     def _get_doujinName(item):
         data:dict = item["data"]
-        doujinName = data.get("jp_name", "") or data.get("eng_name", "") or "无"
+        doujinName = data.get("jp_name", "") or data.get("eng_name", "") or "unknown"
         return doujinName
 
 
