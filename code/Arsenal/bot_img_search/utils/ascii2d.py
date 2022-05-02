@@ -9,58 +9,165 @@
 
 # here put the import lib
 
+
+from loguru import logger
+
+
 class Ascii2dItem:
     URL = 'https://ascii2d.net'
 
     def __init__(self, item) -> None:
-        # 图片信息
-        self.info = ""
-        # 图片链接
-        self.pic_link = ""
-        # 图片名称
-        self.pic_name = ""
-        # 作者链接
-        self.author_link = ""
-        # 作者名称
-        self.author = ""
+        # 图片分辨率 格式 大小信息
+        self.info = "unknown"
         # 缩略图
         self.thumb = ""
+        # hash
+        self.hash = "unknown"
+
+        # 来源链接
+        self.pic_link = "unknown"
+        # 标题
+        self.pic_name = "unknown"
+        # 作者链接
+        self.author_link = "unknown"
+        # 作者名称
+        self.author = "unknown"
         # 类型
-        self.type = ""
+        self.type = "unknown"
 
         self._integrate(item)
 
     def _integrate(self, item):
         """data type: html"""
         try:
-            self.info = item.xpath(""".//div[2]/small""")
+            self.info = item.xpath(""".//div[2]/small/text()""")[0]
         except:
-            self.info = None
+            pass
+
         try:
-            self.pic_link = item.xpath(""".//div[2]/div[3]/h6/a[1]/@href""")
+            self.thumb = f"{Ascii2dItem.URL}{item.xpath('.//div[1]/img/@src')[0]}"
         except:
-            self.pic_link = None
+            pass
+
         try:
-            self.pic_name = item.xpath(""".//div[2]/div[3]/h6/a[1]/text()""")
+            self.hash = item.xpath(""".//div[2]/div[@class='hash']/text()""")[0]
         except:
-            self.pic_name = None
-        try:
-            self.author_link = item.xpath(""".//div[2]/div[3]/h6/a[2]/@href""")
-        except:
-            self.author_link = None
-        try:
-            self.author = item.xpath(""".//div[2]/div[3]/h6/a[2]/text()""")
-        except:
-            self.author = None
-        try:
-            self.thumb = item.xpath(""".//div[1]/img/@src""")
-        except:
-            self.thumb = None
-        try:
-            self.type = item.xpath(""".//div[2]/div[3]/h6/small""")
-        except:
-            self.type = None
+            pass
+
+        self.get_detailInfo(item)
         
+        # 额外处理
+        self.pic_name = self.pic_name.replace("\u3000"," ").replace("\n","")
+        self.type = self.type.replace("\n","")
+
+        # pic_link
+        if "/ch2/" in self.pic_link:
+            self.pic_link = Ascii2dItem.URL + self.pic_link
+            
+        
+    def get_detailInfo(self, item)->dict:
+        detail_info = item.xpath(""".//div[@class='detail-box gray-link']""")
+        logger.debug(detail_info)
+
+        if detail_info:
+            check_data = detail_info[0].xpath("""./strong[@class='info-header']/text()""")
+            # ascii2d类型数据
+            if not check_data:
+                _ = detail_info[0].xpath(""".//h6""")
+                if not _:return
+
+                try:
+                    self.pic_name = _[0].xpath("""./a[1]/text()""")[0]
+                except:
+                    pass
+
+                try:
+                    self.pic_link = _[0].xpath("""./a[1]/@href""")[0]
+                except:
+                    pass
+
+                try:
+                    self.author = _[0].xpath("""./a[2]/text()""")[0]
+                except:
+                    pass
+
+                try:
+                    self.author_link = _[0].xpath("""./a[2]/@href""")[0]
+                except:
+                    pass
+
+                try:
+                    self.type = _[0].xpath("""./small/text()""")[0]
+                except:
+                    pass
+
+            # 评论类型数据
+            elif check_data[0] == "登録された詳細":
+                comment_data = detail_info[0].xpath("""./div[@class='external']""")[0]
+                data = comment_data.xpath(" ./a")
+                logger.debug(f"<comment_data> - {comment_data} <data> - {data}")                
+                
+                # 较少数据
+                if not data:
+                    try:
+                        self.pic_link = comment_data.xpath("""./text()""")[0]
+                    except:
+                        pass
+
+                # 较多数据 TODO
+                else:
+                    # 评论+文字+链接 如:dmm dlsite
+                    if len(data) == 1:
+                        try:
+                            self.pic_name = comment_data.xpath("""./text()""")[0]
+                        except:
+                            pass
+
+                        try:
+                            self.pic_link = data[0].xpath("""./@href""")[0]
+                        except:
+                            pass
+
+                        try:
+                            self.type = data[0].xpath("""./text()""")[0]
+                        except:
+                            pass
+
+                    elif len(data) == 2:
+                        try:
+                            self.pic_name = data[0].xpath("""./text()""")[0]
+                        except:
+                            pass
+
+                        try:
+                            self.pic_link = data[0].xpath("""./@href""")[0]
+                        except:
+                            pass
+
+                        try:
+                            self.author = data[1].xpath("""./text()""")[0]
+                        except:
+                            pass
+
+                        try:
+                            self.author_link = data[1].xpath("""./@href""")[0]
+                        except:
+                            pass
+
+                        try:
+                            self.type = comment_data.xpath("""./small/text()""")[0]
+                        except:
+                            pass
+
+
+        # sourceInfo = {
+        #     "pic_name": self.pic_name,
+        #     "pic_link": self.pic_link,
+        #     "author": self.author,
+        #     "author_link": self.author_link,
+        #     "type": self.type
+        # }
+        # return sourceInfo
 
 class Ascii2dResp:
     def __init__(self, resp_list:list) -> None:

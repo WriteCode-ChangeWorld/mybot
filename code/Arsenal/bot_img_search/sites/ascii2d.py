@@ -9,7 +9,6 @@
 
 # here put the import lib
 # import requests
-from httpx import options
 from lxml import etree
 from requests_toolbelt import MultipartEncoder
 
