@@ -76,36 +76,54 @@ class Ascii2dItem:
                 _ = detail_info[0].xpath(""".//h6""")
                 if not _:return
 
-                try:
-                    self.pic_name = _[0].xpath("""./a[1]/text()""")[0]
-                except:
-                    pass
+                _test = _[0].xpath("""./small[@class='text-muted']/a""")
+                _dmm = _[0].xpath("""./small[@class='text-muted']""")
+                if _test:
+                    try:
+                        self.pic_name = _[0].xpath("""./text()""")[0]
+                    except:
+                        pass
 
-                try:
-                    self.pic_link = _[0].xpath("""./a[1]/@href""")[0]
-                except:
-                    pass
+                    try:
+                        self.pic_link = _dmm[0].xpath("""./a/@href""")[0]
+                    except:
+                        pass
 
-                try:
-                    self.author = _[0].xpath("""./a[2]/text()""")[0]
-                except:
-                    pass
+                    try:
+                        self.type = _dmm[0].xpath("""./a/text()""")[0]
+                    except:
+                        pass
+                else:
+                    try:
+                        self.pic_name = _[0].xpath("""./a[1]/text()""")[0]
+                    except:
+                        pass
 
-                try:
-                    self.author_link = _[0].xpath("""./a[2]/@href""")[0]
-                except:
-                    pass
+                    try:
+                        self.pic_link = _[0].xpath("""./a[1]/@href""")[0]
+                    except:
+                        pass
 
-                try:
-                    self.type = _[0].xpath("""./small/text()""")[0]
-                except:
-                    pass
+                    try:
+                        self.author = _[0].xpath("""./a[2]/text()""")[0]
+                    except:
+                        pass
+
+                    try:
+                        self.author_link = _[0].xpath("""./a[2]/@href""")[0]
+                    except:
+                        pass
+
+                    try:
+                        self.type = _[0].xpath("""./small/text()""")[0]
+                    except:
+                        pass
 
             # 评论类型数据
             elif check_data[0] == "登録された詳細":
                 comment_data = detail_info[0].xpath("""./div[@class='external']""")[0]
                 data = comment_data.xpath(" ./a")
-                logger.debug(f"<comment_data> - {comment_data} <data> - {data}")                
+                logger.debug(f"<comment_data> - {comment_data} | <data> - {data}")                
                 
                 # 较少数据
                 if not data:
@@ -114,7 +132,7 @@ class Ascii2dItem:
                     except:
                         pass
 
-                # 较多数据 TODO
+                # 较多数据
                 else:
                     # 评论+文字+链接 如:dmm dlsite
                     if len(data) == 1:
@@ -159,15 +177,6 @@ class Ascii2dItem:
                         except:
                             pass
 
-
-        # sourceInfo = {
-        #     "pic_name": self.pic_name,
-        #     "pic_link": self.pic_link,
-        #     "author": self.author,
-        #     "author_link": self.author_link,
-        #     "type": self.type
-        # }
-        # return sourceInfo
 
 class Ascii2dResp:
     def __init__(self, resp_list:list) -> None:
