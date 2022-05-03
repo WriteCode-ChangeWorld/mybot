@@ -8,6 +8,7 @@
 '''
 
 # here put the import lib
+import os
 from requests_toolbelt import MultipartEncoder
 
 from Arsenal.basic.bot_tool import tool
@@ -42,6 +43,8 @@ class SauceNao:
 			params["api_key"] = self.api_key
 
 		self.params = params
+
+		self.limit_byte = 20 * 1024 * 1024
 
 	@staticmethod
 	def _err_code(code:int):
@@ -104,6 +107,10 @@ class SauceNao:
 			resp = baseRequest(options=options, params=params)
 		# local file
 		elif file:
+			if os.path.getsize(file) >= self.limit_byte:
+				logger.warning(f"{self._err_code(413)} - {file}")
+				return self._err_code(413)
+
 			m = MultipartEncoder(fields={
 					"file": ("filename", open(file, "rb"),  "type=multipart/form-data")
 				}
