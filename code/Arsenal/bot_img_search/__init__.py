@@ -1,1 +1,1 @@
-from . import bot_img_search
+from .bot_img_search import Bot_Img_Search
