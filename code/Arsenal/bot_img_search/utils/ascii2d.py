@@ -61,6 +61,7 @@ class Ascii2dItem:
         self.type = self.type.replace("\n","")
 
         # pic_link
+        self.pic_link = self.pic_link.replace("\n","")
         if "/ch2/" in self.pic_link:
             self.pic_link = Ascii2dItem.URL + self.pic_link
             

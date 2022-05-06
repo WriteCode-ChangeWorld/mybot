@@ -9,6 +9,7 @@
 
 # here put the import lib
 import os
+import re
 from lxml import etree
 from requests_toolbelt import MultipartEncoder
 
@@ -37,7 +38,6 @@ class Ascii2d:
 
 		self.limit_byte = 5 * 1024 * 1024
 
-	# TODO
 	@staticmethod
 	def _err_code(code:int):
 		code_info = {
@@ -168,154 +168,29 @@ class Ascii2d:
 			return ascii2d_resp
 	
 	def deal_with_resp(self, ascii2d_resp:Ascii2dResp)->Ascii2dResp or str:
+		logger.debug(f"Length-ascii2d_resp.results - {len(ascii2d_resp.results)}")
+		[logger.debug(i.__dict__) for i in ascii2d_resp.results]
+
+		# 去除空数据的box4
+		new_results = [r for r in ascii2d_resp.results \
+              if not (r.pic_link == "unknown" and r.pic_name == "unknown" and \
+             r.author_link == "unknown" and r.author == "unknown" and r.type == "unknown")]
+
+		# 更新筛选后的box
+		if not new_results:
+			ascii2d_resp.results = ascii2d_resp.results[1]
+		else:
+			ascii2d_resp.results = new_results
+
+		# 提高相同分辨率,size更大的box的权重
+		if len(ascii2d_resp.results) != 1:
+			_info = ascii2d_resp.results[0].info
+			_resolution = _info.split(" ")[0]
+			_size = int(re.sub("[a-zA-Z]", "", _info.split(" ")[-1]))
+
+			for i in range(len(ascii2d_resp.results)):
+				i_list = ascii2d_resp.results[i].info.split(" ")
+				if i_list[0] == _resolution and int(re.sub("[a-zA-Z]", "", i_list[-1])) > _size:
+					ascii2d_resp.results[0], ascii2d_resp.results[i] = ascii2d_resp.results[i], ascii2d_resp.results[0]
+
 		return ascii2d_resp
-
-	def search_backup(self,target):
-		# 先色合检索再特征检索
-		# res = httpx.post(target, data=data, **self.requests_kwargs)
-		resp = baseRequest(options={"url": target})
-		if "color" not in resp.url:
-			print(resp.url)
-			print("请求出错")
-			return 
-
-		# 结果过滤
-		print("色合检索")
-		result1 = self.find_result(resp)
-
-		img_color_url = resp.url
-		# color_resp = resp.text
-		img_hash = img_color_url.split("/")[-1]
-		img_bovw_url = self.bovw + img_hash
-
-		# 结果过滤
-		bovw_resp = baseRequest(options={"url": img_bovw_url})
-		print("\n特征检索")
-		result2 = self.find_result(bovw_resp)
-
-		print("\nhash",img_hash)
-		print(result1,result2)
-
-	def find_result(self,html):
-		"""
-		20200621
-		针对色合和特征都只匹配到tw或pixiv,前者匹配到tw则记录,特征匹配时跳过tw
-		{'thumb_url': 'xxx', 'info': []}
-		info为空,说明匹配到的是登录详细之类的
-		"""
-		obj = etree.HTML(html.text.replace("\n",""))
-
-		# 对返回结果进行判断,优先选取pixiv和twitter,次之是Danbooru,yande,最后默认选取第一个
-		select_site_ex = """//div[@class="row item-box"]//div[@class="detail-box gray-link"]"""
-		sites = []
-		gray_link = obj.xpath(select_site_ex)
-
-		# 页面显示: 失敗,現在この画像は検索できません
-		if gray_link == []:
-			res = {}
-			return res
-
-		# 获取所有搜索结果中的site
-		for g in gray_link:
-			# 只取一条搜索结果中的前两条
-			site = g.xpath(""".//h6/small/text()""")[:2]
-			# pixiv,tw,niconico匹配不到
-			if site == []:
-				try:
-					site = g.xpath("../div[@class='pull-xs-right']/a/@href")
-					if site != []:
-						site = site[0].split(r"//")[-1].split(r".")[0]
-				except Exception as e:
-					print(g.xpath("../div[@class='pull-xs-right']/a/@href"))
-					print(e)
-					site = []
-
-			# 去重
-			if type(site) == type([]):
-				site = list(set(site))
-			sites.append(site)
-		# print(sites)
-
-
-		# 判断site是否在预定站点内
-		# 默认是第一个搜图结果,0是需要搜的图
-		num = 1
-		# danbooru.donmai.us / kagamihara.donmai.us / konachan.com
-		# gelbooru.com / yande.re
-		# 尚未遇见的:https://xbooru.com https://rule34.xxx
-		extra_sites = ["danbooru.donmai.us","yande.re","kagamihara.donmai.us","konachan.com","gelbooru.com"]
-		for index,site in enumerate(sites):
-			if site == []:
-				continue
-
-			if True in [True if s == "pixiv" else False for s in site]:
-				# 加入判断,判断该id是否存在
-				num = index
-				break
-			if True in [True if s == "twitter" else False for s in site]:
-				num = index
-				break
-			# 不满足pixiv和tw的,应该是没有来源信息和作者信息,只有右侧的图站链接
-			if True in [True if site[0] in i else False for i in extra_sites]:
-				num = index
-				break
-		# print(num,sites[num],'\n')
-
-		# 匹配结果
-		res = {}
-		# 正常状态下是pixiv,tw,niconico等,异常下对yande,Danbooru等站点的图进行检测
-		item = obj.xpath("""//div[@class="row item-box"]""")[num]
-		# 预览图
-		try:
-			res["thumb_url"] = self.host + item.xpath("""./div[contains(@class,"image-box")]/img/@src""")[0]
-		except Exception as e:
-			res["thumb_url"] = ""
-
-		# 匹配方式
-		# 第一种为图站,异常
-		# 第二种为pixiv,tw,niconico
-		if True in [True if sites[num][0] in i else False for i in extra_sites]:
-			res["source_url"] = item.xpath(""".//div[@class="pull-xs-right"]/a/@href""")[0]
-		else:
-
-			res_info = []
-			# 只取一条搜索结果中的前两条
-			info = item.xpath(""".//div[@class="detail-box gray-link"]//h6""")[:2]
-			for i in info:
-				data = {}
-				# 来源标题
-				try:
-					data["source_text"] = i.xpath("""./a[1]/text()""")[0].replace("\u3000","")
-				except:
-					data["source_text"] = ""
-				# 来源地址
-				try:
-					data["source_url"] = i.xpath("""./a[1]/@href""")[0]
-				except:
-					data["source_url"] = ""
-				# 作者
-				try:
-					data["username"] = i.xpath("""./a[2]/text()""")[0].replace("\u3000","")
-				except:
-					data["username"] = ""
-				# 作者地址: Author
-				try:
-					data["user_url"] = i.xpath("""./a[2]/@href""")[0]
-				except:
-					data["user_url"] = ""
-
-				res_info.append(data)
-			res["info"] = res_info
-
-		# 格式化输出
-		# print(res)
-		print("预览图:\n{}".format(res.get("thumb_url","")))
-		if res.get("info") == None:
-			print("来源地址: {}".format(res.get("source_url")))
-		else:
-			for r in res.get("info"):
-				print("来源标题: {}\n来源地址: {}".format(r.get("source_text"),r.get("source_url")))
-				print("作者: {}\n{}".format(r.get("username"),r.get("user_url")))
-				print("="*30)
-
-		return res
